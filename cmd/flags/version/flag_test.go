@@ -10,7 +10,7 @@ import (
 
 func TestAddFlag(t *testing.T) {
 	var exitCode int
-	ExitFunc = func(code int) {
+	Exit = func(code int) {
 		exitCode = code
 	}
 
@@ -33,7 +33,7 @@ func TestAddFlag(t *testing.T) {
 
 func TestRunFunction(t *testing.T) {
 	var exitCode int
-	ExitFunc = func(code int) {
+	Exit = func(code int) {
 		exitCode = code
 	}
 
