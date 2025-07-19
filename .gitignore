@@ -1,0 +1,53 @@
+# Go binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Build directories
+**/build/
+**/build-dir/
+**/bin/
+**/usr
+**/.flatpak-builder
+httpzen
+
+# Dependency directories
+**/vendor/
+
+# Cache and temporary files
+*.out
+*.log
+*.tmp
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE/editor files
+.idea/
+.vscode/
+*.code-workspace
+
+# Test coverage files
+*.coverprofile
+coverage.out
+
+# Local configuration files
+.env
+.env.*
+
+# Go profile files
+pprof*
+
+# Go lock files
+Gopkg.lock
+
+# Go build files
+*.a
+
+# Go cache files
+*.cache

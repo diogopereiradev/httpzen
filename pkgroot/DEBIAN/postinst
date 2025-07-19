@@ -1,0 +1,2 @@
+#!/bin/bash
+echo "[Httpzen] Httpzen has been installed successfully! Now you can type: httpzen"

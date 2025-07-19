@@ -1,0 +1,16 @@
+app-id: github.diogopereiradev.httpzen
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: httpzen
+finish-args:
+  - --share=network
+  - --filesystem=host
+modules:
+  - name: httpzen
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 ./build/httpzen /app/bin/httpzen
+    sources:
+      - type: dir
+        path: .

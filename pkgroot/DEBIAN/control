@@ -1,0 +1,8 @@
+Package: httpzen
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: Diogo Pereira <diogopereira.contact@proton.me>
+Description: Httpzen - A user-friendly command-line interface for HTTP APIs
+Depends: bash (>= 4.0)
