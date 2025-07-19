@@ -14,7 +14,7 @@ var Website string = "unknown"
 var Repository string = "unknown"
 var License string = "unknown"
 
-var ExitFunc = os.Exit
+var Exit = os.Exit
 
 func AddFlag(rootCmd *cobra.Command) {
 	rootCmd.PersistentFlags().BoolP("version", "v", false, "Show the version of the application")
@@ -39,6 +39,6 @@ func AddFlag(rootCmd *cobra.Command) {
 
 		fmt.Println(borderStyle.Render(versionInfo))
 
-		ExitFunc(0)
+		Exit(0)
 	}
 }
