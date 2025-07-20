@@ -48,22 +48,22 @@ clean: .debian-clean
 .build-linux:
 	@echo "\033[33m[Make]\033[0m \033[32mBuilding Linux binary...\033[0m"
 	@GOOS=linux GOARCH=amd64 go build \
-		-ldflags="-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.Version=$(VERSION)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.BuildDate=$(CURRENT_DATETIME)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.Website=$(WEBSITE)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.Repository=$(REPOSITORY)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.License=$(LICENSE)'" \
+		-ldflags="-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Version=$(VERSION)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.BuildDate=$(CURRENT_DATETIME)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Website=$(WEBSITE)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Repository=$(REPOSITORY)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.License=$(LICENSE)'" \
 		-o ./build/httpzen main.go
 	@echo "\033[33m[Make]\033[0m \033[32mLinux binary build finished.\033[0m"
 
 .build-windows:
 	@echo "\033[33m[Make]\033[0m \033[32mBuilding Windows binary...\033[0m"
 	@GOOS=windows GOARCH=amd64 go build \
-		-ldflags="-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.Version=$(VERSION)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.BuildDate=$(CURRENT_DATETIME)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.Website=$(WEBSITE)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.Repository=$(REPOSITORY)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.License=$(LICENSE)'" \
+		-ldflags="-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Version=$(VERSION)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.BuildDate=$(CURRENT_DATETIME)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Website=$(WEBSITE)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Repository=$(REPOSITORY)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.License=$(LICENSE)'" \
 		-o ./build/httpzen.exe main.go
 	@echo "\033[33m[Make]\033[0m \033[32mWindows binary build finished.\033[0m"
 

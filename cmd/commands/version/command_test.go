@@ -18,7 +18,7 @@ func TestExecutor(t *testing.T) {
 		Use: "test",
 	}
 
-	Executor(rootCmd)
+	Init(rootCmd)
 
 	err := rootCmd.Execute()
 	assert.NoError(t, err, "should no error when executing the root command")
@@ -55,7 +55,7 @@ func TestRunFunction(t *testing.T) {
 		Use: "test",
 	}
 
-	Executor(rootCmd)
+	Init(rootCmd)
 
 	var command *cobra.Command
 	for _, cmd := range rootCmd.Commands() {
