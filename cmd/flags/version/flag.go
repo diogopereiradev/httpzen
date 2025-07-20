@@ -27,7 +27,7 @@ func AddFlag(rootCmd *cobra.Command) {
 			BorderForeground(lipgloss.Color("86")).
 			Padding(1, 2)
 
-		fieldKeyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#3C3C3C"))
+		fieldKeyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("86"))
 
 		var versionInfo string
 		versionInfo += titleStyle.Render("HTTPZen - Version information") + "\n\n"
