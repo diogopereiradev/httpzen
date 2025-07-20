@@ -18,7 +18,13 @@ test:
 test_cov:
 	@echo "\033[33m[Make]\033[0m \033[32mRunning tests with coverage...\033[0m"
 	@go install gotest.tools/gotestsum@v1.12.3
-	@env TEST_ENV=true gotestsum ./cmd/flags/... ./cmd/commands/... ./internal/... -coverprofile=coverage.out ./cmd/flags/version/... && go tool cover -html=coverage.out
+	@env TEST_ENV=true gotestsum ./cmd/commands/... ./internal/... -coverprofile=coverage.out
+	@echo "\033[33m[Make]\033[0m \033[32mTests with coverage completed.\033[0m"
+
+test_cov_ui:
+	@echo "\033[33m[Make]\033[0m \033[32mRunning tests with coverage...\033[0m"
+	@go install gotest.tools/gotestsum@v1.12.3
+	@env TEST_ENV=true gotestsum ./cmd/commands/... ./internal/... -coverprofile=coverage.out && go tool cover -html=coverage.out
 	@echo "\033[33m[Make]\033[0m \033[32mTests with coverage completed.\033[0m"
 
 lint:

@@ -3,8 +3,7 @@ package cmd
 import (
 	"os"
 
-	test_command "github.com/diogopereiradev/httpzen/cmd/commands/test"
-	version_flag "github.com/diogopereiradev/httpzen/cmd/flags/version"
+	version_command "github.com/diogopereiradev/httpzen/cmd/commands/version"
 	"github.com/spf13/cobra"
 )
 
@@ -15,10 +14,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	// Commands
-	rootCmd.AddCommand(test_command.Executor())
-
-	// Flags
-	version_flag.AddFlag(rootCmd)
+	version_command.Executor(rootCmd)
 }
 
 func Execute() {
