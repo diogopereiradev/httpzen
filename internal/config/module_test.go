@@ -1,104 +1,18 @@
-package app_config
+package config_module
 
 import (
 	"os"
 	"testing"
 
+	app_path_util "github.com/diogopereiradev/httpzen/internal/utils/app_path"
 	"github.com/stretchr/testify/assert"
 )
-
-// GetConfigPath
-func TestGetConfigPath(t *testing.T) {
-	GOOS = "linux"
-
-	originalUserHomeDir := userHomeDir
-	originalGetenv := getenv
-	userHomeDir = func() (string, error) { return "/home/testuser", nil }
-	getenv = func(key string) string { return "" }
-	defer func() {
-		userHomeDir = originalUserHomeDir
-		getenv = originalGetenv
-	}()
-	
-	configPath := GetConfigPath()
-	assert.NotEmpty(t, configPath, "should return a non-empty config path")
-}
-
-func TestGetConfigPathWindows(t *testing.T) {
-	GOOS = "windows"
-
-	originalUserHomeDir := userHomeDir
-	originalGetenv := getenv
-	userHomeDir = func() (string, error) { return "C:\\Users\\TestUser", nil }
-	getenv = func(key string) string {
-		if key == "APPDATA" { return "C:\\Users\\TestUser\\AppData\\Roaming" }
-		return ""
-	}
-	defer func() {
-		userHomeDir = originalUserHomeDir
-		getenv = originalGetenv
-	}()
-
-	configPath := GetConfigPath()
-	assert.Equal(t, "C:\\Users\\TestUser\\AppData\\Roaming\\httpzen", configPath, "should return correct path for Windows")
-}
-
-func TestGetConfigPathDarwin(t *testing.T) {
-	GOOS = "darwin"
-
-	originalUserHomeDir := userHomeDir
-	originalGetenv := getenv
-	userHomeDir = func() (string, error) { return "/Users/TestUser", nil }
-	getenv = func(key string) string { return "" }
-	defer func() {
-		userHomeDir = originalUserHomeDir
-		getenv = originalGetenv
-	}()
-
-	configPath := GetConfigPath()
-	assert.Equal(t, "/Users/TestUser/Library/Application Support/httpzen", configPath, "should return correct path for macOS")
-}
-
-func TestGetConfigPathLinux(t *testing.T) {
-	GOOS = "linux"
-
-	originalUserHomeDir := userHomeDir
-	originalGetenv := getenv
-
-	userHomeDir = func() (string, error) { return "/home/testuser", nil }
-	getenv = func(key string) string { return "" }
-	defer func() {
-		userHomeDir = originalUserHomeDir
-		getenv = originalGetenv
-	}()
-
-	configPath := GetConfigPath()
-	assert.Equal(t, "/home/testuser/.config/httpzen", configPath, "should return correct path for Linux")
-}
-
-func TestGetConfigPathError(t *testing.T) {
-	originalUserHomeDir := userHomeDir
-	originalGetenv := getenv
-	userHomeDir = func() (string, error) { return "", assert.AnError }
-	getenv = func(_ string) string { return "" }
-	defer func() {
-		userHomeDir = originalUserHomeDir
-		getenv = originalGetenv
-	}()
-	
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("Expected panic, but did not occur")
-		}
-	}()
-	GetConfigPath()
-}
 
 // GetConfig
 func TestGetConfig(t *testing.T) {
 	CONFIG_NAME = "httpzen_test"
 
-	configPath := GetConfigPath()
+	configPath := app_path_util.GetConfigPath()
 	configFile := configPath + "/" + CONFIG_NAME + "." + CONFIG_EXTENSION
 	_ = os.Remove(configFile)
 	_, err := os.Stat(configFile)
@@ -115,7 +29,7 @@ func TestGetConfig(t *testing.T) {
 func TestGetConfigReadInConfig(t *testing.T) {
 	CONFIG_NAME = "httpzen_test"
 
-	configPath := GetConfigPath()
+	configPath := app_path_util.GetConfigPath()
 	configFile := configPath + "/" + CONFIG_NAME + "." + CONFIG_EXTENSION
 	InitConfig()
 
@@ -130,7 +44,7 @@ func TestGetConfigReadInConfig(t *testing.T) {
 func TestInitConfig(t *testing.T) {
 	CONFIG_NAME = "httpzen_test"
 
-	configPath := GetConfigPath()
+	configPath := app_path_util.GetConfigPath()
 	configFile := configPath + "/" + CONFIG_NAME + "." + CONFIG_EXTENSION
 	_ = os.Remove(configFile)
 
@@ -146,7 +60,7 @@ func TestInitConfig(t *testing.T) {
 
 func TestInitConfigPanicOnMkdirAll(t *testing.T) {
 	originalMkdirAll := mkdirAll
-	mkdirAll = func (string, os.FileMode) error { return assert.AnError }
+	mkdirAll = func(string, os.FileMode) error { return assert.AnError }
 	defer func() { mkdirAll = originalMkdirAll }()
 
 	defer func() {
@@ -161,7 +75,7 @@ func TestInitConfigPanicOnWriteConfigAs(t *testing.T) {
 	configPathBkp := CONFIG_NAME
 	CONFIG_NAME = "httpzen_readonly_test"
 
-	configPath := GetConfigPath()
+	configPath := app_path_util.GetConfigPath()
 	_ = os.MkdirAll(configPath, 0755)
 
 	configFile := configPath + "/" + CONFIG_NAME + "." + CONFIG_EXTENSION
@@ -189,7 +103,7 @@ func TestInitConfigPanicOnWriteConfigAs(t *testing.T) {
 func TestUpdateConfig(t *testing.T) {
 	CONFIG_NAME = "httpzen_test"
 
-	configPath := GetConfigPath()
+	configPath := app_path_util.GetConfigPath()
 	configFile := configPath + "/" + CONFIG_NAME + "." + CONFIG_EXTENSION
 	_ = os.Remove(configFile)
 
@@ -209,7 +123,7 @@ func TestUpdateConfig(t *testing.T) {
 
 func TestUpdateConfigPanicOnMkdirAll(t *testing.T) {
 	originalMkdirAll := mkdirAll
-	mkdirAll = func (string, os.FileMode) error { return assert.AnError }
+	mkdirAll = func(string, os.FileMode) error { return assert.AnError }
 	defer func() { mkdirAll = originalMkdirAll }()
 
 	config := Config{
@@ -222,7 +136,7 @@ func TestUpdateConfigPanicOnWriteConfigAs(t *testing.T) {
 	configPathBkp := CONFIG_NAME
 	CONFIG_NAME = "httpzen_readonly_update_test"
 
-	configPath := GetConfigPath()
+	configPath := app_path_util.GetConfigPath()
 	_ = os.MkdirAll(configPath, 0755)
 
 	configFile := configPath + "/" + CONFIG_NAME + "." + CONFIG_EXTENSION
