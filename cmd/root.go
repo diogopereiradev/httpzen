@@ -3,22 +3,19 @@ package cmd
 import (
 	"os"
 
-	test_command "github.com/diogopereiradev/httpzen/cmd/commands/test"
-	version_flag "github.com/diogopereiradev/httpzen/cmd/flags/version"
+	help_command "github.com/diogopereiradev/httpzen/cmd/commands/help"
+	version_command "github.com/diogopereiradev/httpzen/cmd/commands/version"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "httpzen",
-	Short: "HTTP Zen CLI Tool for API Management and Development",
+	Short: "Httpzen CLI Tool for API Management and Development",
 }
 
 func init() {
-	// Commands
-	rootCmd.AddCommand(test_command.Executor())
-
-	// Flags
-	version_flag.AddFlag(rootCmd)
+	help_command.Init(rootCmd)
+	version_command.Init(rootCmd)
 }
 
 func Execute() {

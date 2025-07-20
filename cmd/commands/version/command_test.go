@@ -1,4 +1,4 @@
-package version_flag
+package version_command
 
 import (
 	"os"
@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAddFlag(t *testing.T) {
+func TestExecutor(t *testing.T) {
 	var exitCode int
 	Exit = func(code int) {
 		exitCode = code
@@ -18,17 +18,21 @@ func TestAddFlag(t *testing.T) {
 		Use: "test",
 	}
 
-	AddFlag(rootCmd)
+	Init(rootCmd)
 
 	err := rootCmd.Execute()
 	assert.NoError(t, err, "should no error when executing the root command")
 	assert.Equal(t, 0, exitCode, "should exit with code 0")
 
-	flag := rootCmd.PersistentFlags().Lookup("version")
-
-	assert.NotNil(t, flag, "should 'version' flag to be added")
-	assert.Equal(t, "v", flag.Shorthand, "should shorthand for 'version' flag to be 'v'")
-	assert.Equal(t, "Show the version of the application", flag.Usage, "should usage description for 'version' flag to be 'Show the version of the application'")
+	var found bool
+	for _, cmd := range rootCmd.Commands() {
+		if cmd.Use == "version" {
+			found = true
+			assert.Equal(t, "Show the version of the application", cmd.Short, "should usage description for 'version' command to be 'Show the version of the application'")
+			break
+		}
+	}
+	assert.True(t, found, "should 'version' command to be added")
 }
 
 func TestRunFunction(t *testing.T) {
@@ -51,9 +55,19 @@ func TestRunFunction(t *testing.T) {
 		Use: "test",
 	}
 
-	AddFlag(rootCmd)
+	Init(rootCmd)
 
-	rootCmd.Run(rootCmd, []string{})
+	var command *cobra.Command
+	for _, cmd := range rootCmd.Commands() {
+		if cmd.Use == "version" {
+			command = cmd
+			assert.Equal(t, "Show the version of the application", cmd.Short, "should usage description for 'version' command to be 'Show the version of the application'")
+			break
+		}
+	}
+	assert.True(t, command != nil, "should 'version' command to be found")
+
+	command.Run(command, []string{})
 
 	w.Close()
 	os.Stdout = oldStdout

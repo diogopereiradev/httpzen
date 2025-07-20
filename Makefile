@@ -18,7 +18,13 @@ test:
 test_cov:
 	@echo "\033[33m[Make]\033[0m \033[32mRunning tests with coverage...\033[0m"
 	@go install gotest.tools/gotestsum@v1.12.3
-	@env TEST_ENV=true gotestsum ./cmd/flags/... ./cmd/commands/... ./internal/... -coverprofile=coverage.out ./cmd/flags/version/... && go tool cover -html=coverage.out
+	@env TEST_ENV=true gotestsum ./cmd/commands/... ./internal/... -coverprofile=coverage.out
+	@echo "\033[33m[Make]\033[0m \033[32mTests with coverage completed.\033[0m"
+
+test_cov_ui:
+	@echo "\033[33m[Make]\033[0m \033[32mRunning tests with coverage...\033[0m"
+	@go install gotest.tools/gotestsum@v1.12.3
+	@env TEST_ENV=true gotestsum ./cmd/commands/... ./internal/... -coverprofile=coverage.out && go tool cover -html=coverage.out
 	@echo "\033[33m[Make]\033[0m \033[32mTests with coverage completed.\033[0m"
 
 lint:
@@ -42,22 +48,22 @@ clean: .debian-clean
 .build-linux:
 	@echo "\033[33m[Make]\033[0m \033[32mBuilding Linux binary...\033[0m"
 	@GOOS=linux GOARCH=amd64 go build \
-		-ldflags="-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.Version=$(VERSION)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.BuildDate=$(CURRENT_DATETIME)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.Website=$(WEBSITE)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.Repository=$(REPOSITORY)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.License=$(LICENSE)'" \
+		-ldflags="-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Version=$(VERSION)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.BuildDate=$(CURRENT_DATETIME)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Website=$(WEBSITE)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Repository=$(REPOSITORY)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.License=$(LICENSE)'" \
 		-o ./build/httpzen main.go
 	@echo "\033[33m[Make]\033[0m \033[32mLinux binary build finished.\033[0m"
 
 .build-windows:
 	@echo "\033[33m[Make]\033[0m \033[32mBuilding Windows binary...\033[0m"
 	@GOOS=windows GOARCH=amd64 go build \
-		-ldflags="-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.Version=$(VERSION)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.BuildDate=$(CURRENT_DATETIME)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.Website=$(WEBSITE)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.Repository=$(REPOSITORY)' \
-		-X 'github.com/diogopereiradev/httpzen/cmd/flags/version.License=$(LICENSE)'" \
+		-ldflags="-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Version=$(VERSION)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.BuildDate=$(CURRENT_DATETIME)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Website=$(WEBSITE)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Repository=$(REPOSITORY)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.License=$(LICENSE)'" \
 		-o ./build/httpzen.exe main.go
 	@echo "\033[33m[Make]\033[0m \033[32mWindows binary build finished.\033[0m"
 
