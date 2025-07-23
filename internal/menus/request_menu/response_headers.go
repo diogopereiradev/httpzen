@@ -16,8 +16,8 @@ func response_headers_Render(m *Model) string {
 
 	keyTextStyle := lipgloss.NewStyle().Foreground(theme.Primary)
 
-	keys := make([]string, 0, len(m.response.ResponseHeaders))
-	for key, value := range m.response.ResponseHeaders {
+	keys := make([]string, 0, len(m.response.Headers))
+	for key, value := range m.response.Headers {
 		if len(value) > 0 {
 			keys = append(keys, key)
 		}
@@ -26,7 +26,7 @@ func response_headers_Render(m *Model) string {
 	sort.Strings(keys)
 
 	for i, key := range keys {
-		value := m.response.ResponseHeaders[key]
+		value := m.response.Headers[key]
 		content += ansi.Wrap(keyTextStyle.Render(key)+": "+value[0], term_size.GetTerminalWidth(9999), "")
 		if i < len(keys)-1 {
 			content += "\n"

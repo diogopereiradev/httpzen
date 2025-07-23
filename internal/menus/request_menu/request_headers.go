@@ -16,12 +16,12 @@ func request_headers_Render(m *Model) string {
 
 	keyTextStyle := lipgloss.NewStyle().Foreground(theme.Primary)
 
-	if len(m.response.RequestHeaders) < 1 {
+	if len(m.response.Request.Headers) < 1 {
 		return lipgloss.NewStyle().Foreground(theme.Warn).Render("No request headers found.")
 	}
 
-	keys := make([]string, 0, len(m.response.RequestHeaders))
-	for key, value := range m.response.RequestHeaders {
+	keys := make([]string, 0, len(m.response.Request.Headers))
+	for key, value := range m.response.Request.Headers {
 		if len(value) > 0 {
 			keys = append(keys, key)
 		}
@@ -30,7 +30,7 @@ func request_headers_Render(m *Model) string {
 	sort.Strings(keys)
 
 	for i, key := range keys {
-		value := m.response.RequestHeaders[key]
+		value := m.response.Request.Headers[key]
 		content += ansi.Wrap(keyTextStyle.Render(key)+": "+value[0], term_size.GetTerminalWidth(9999), "")
 		if i < len(keys)-1 {
 			content += "\n"

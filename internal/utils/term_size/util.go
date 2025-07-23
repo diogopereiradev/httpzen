@@ -11,7 +11,7 @@ var getSizeFunc = func() (int, error) {
 	return width, err
 }
 
-var getHeightFunc = func() (int, error) {
+var GetHeightFunc = func() (int, error) {
 	_, height, err := term.GetSize(int(os.Stdout.Fd()))
 	return height, err
 }
@@ -28,7 +28,7 @@ func GetTerminalWidth(max int) int {
 }
 
 func GetTerminalHeight(max int) int {
-	height, err := getHeightFunc()
+	height, err := GetHeightFunc()
 	if err != nil || height <= 0 {
 		return max
 	}

@@ -42,10 +42,10 @@ type RequestResponse struct {
 	StatusMessage   string         `json:"status_message"`
 	StatusCode      int            `json:"status_code"`
 	ExecutionTime   float64        `json:"execution_time"`
-	RequestHeaders  http.Header    `json:"request_headers"`
-	ResponseHeaders http.Header    `json:"response_headers"`
+	Headers         http.Header    `json:"headers"`
 	Body            string         `json:"body"`
 	Cookies         []*http.Cookie `json:"cookies"`
+	Request         RequestOptions `json:"request"`
 	Path            string         `json:"path"`
 	Host            string         `json:"host"`
 	Method          string         `json:"method"`
@@ -100,8 +100,7 @@ func RunRequest(options RequestOptions) RequestResponse {
 		StatusMessage:   res.Status(),
 		StatusCode:      res.StatusCode(),
 		ExecutionTime:   executionTime,
-		RequestHeaders:  options.Headers,
-		ResponseHeaders: res.Header(),
+		Headers:         res.Header(),
 		Body:            options.Body,
 		Cookies:         res.Cookies(),
 		Path:            res.Request.RawRequest.URL.Path,
@@ -109,6 +108,13 @@ func RunRequest(options RequestOptions) RequestResponse {
 		Method:          res.Request.Method,
 		IpInfos:         handleDomainIpsLookup(res),
 		SlowResponse:    executionTime > float64(config.SlowResponseThreshold),
+		Request:         RequestOptions{
+			Url:     url,
+			Headers: options.Headers,
+			Method:  method,
+			Timeout: options.Timeout,
+			Body:    options.Body,
+		},
 	}
 }
 

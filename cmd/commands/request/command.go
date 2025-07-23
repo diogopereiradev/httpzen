@@ -14,7 +14,7 @@ import (
 
 type RequestFlags struct {
 	// Data
-	Headers   []string
+	Headers []string
 
 	// Content types
 	Json      bool
@@ -33,15 +33,18 @@ var Exit = os.Exit
 func parseHeaders(headers []string) http.Header {
 	result := http.Header{}
 	for _, header := range headers {
-	  parts := strings.SplitN(header, ":", 2)
-	  if len(parts) == 2 {
+		parts := strings.SplitN(header, ":", 2)
+		if len(parts) == 2 {
 			key := strings.TrimSpace(parts[0])
 			value := strings.TrimSpace(parts[1])
 			result.Add(key, value)
-	  }
+		}
 	}
 	return result
 }
+
+var RunRequestFunc = request_module.RunRequest
+var RequestMenuNewFunc = request_menu.New
 
 func Init(rootCmd *cobra.Command) {
 	rootCmd.Run = func(cmd *cobra.Command, args []string) {
@@ -74,14 +77,14 @@ func Init(rootCmd *cobra.Command) {
 		}
 
 		requestOptions := request_module.RequestOptions{
-			Url: 				url,
-			Headers: 		parseHeaders(headers),
-			Method: 		method,
-			Timeout:    30 * time.Second,
+			Url:     url,
+			Headers: parseHeaders(headers),
+			Method:  method,
+			Timeout: 30 * time.Second,
 		}
 
-		res := request_module.RunRequest(requestOptions)
-		request_menu.New(&res)
+		res := RunRequestFunc(requestOptions)
+		RequestMenuNewFunc(&res)
 	}
 
 	rootCmd.Flags().StringSliceP("header", "H", []string{}, "Add a header to the request (can be used multiple times)")

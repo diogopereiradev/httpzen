@@ -44,22 +44,22 @@ func TestGetTerminalHeight_DefaultFunc(t *testing.T) {
 }
 
 func TestGetTerminalHeight(t *testing.T) {
-	origGetHeightFunc := getHeightFunc
-	defer func() { getHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := GetHeightFunc
+	defer func() { GetHeightFunc = origGetHeightFunc }()
 
-	getHeightFunc = func() (int, error) { return 50, nil }
+	GetHeightFunc = func() (int, error) { return 50, nil }
 	height := GetTerminalHeight(100)
 	assert.Equal(t, 50, height)
 
-	getHeightFunc = func() (int, error) { return 120, nil }
+	GetHeightFunc = func() (int, error) { return 120, nil }
 	height = GetTerminalHeight(100)
 	assert.Equal(t, 100, height)
 
-	getHeightFunc = func() (int, error) { return 0, nil }
+	GetHeightFunc = func() (int, error) { return 0, nil }
 	height = GetTerminalHeight(100)
 	assert.Equal(t, 100, height)
 
-	getHeightFunc = func() (int, error) { return 0, assert.AnError }
+	GetHeightFunc = func() (int, error) { return 0, assert.AnError }
 	height = GetTerminalHeight(100)
 	assert.Equal(t, 100, height)
 }
