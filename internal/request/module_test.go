@@ -12,43 +12,39 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-func Test_handleHttpMethod(t *testing.T) {
+func Test_HandleHttpMethod(t *testing.T) {
 	cases := []struct {
 		input    string
 		expected string
 	}{
-		{"Get", "Get"},
-		{"Post", "Post"},
-		{"Put", "Put"},
-		{"Delete", "Delete"},
-		{"Patch", "Patch"},
-		{"Head", "Head"},
-		{"Unknown", "GET"},
-		{"", "GET"},
+		{"get", "GET"},
+		{"post", "POST"},
+		{"put", "PUT"},
+		{"delete", "DELETE"},
+		{"patch", "PATCH"},
+		{"head", "HEAD"},
+		{"", ""},
 	}
 	for _, c := range cases {
-		if got := handleHttpMethod(c.input); got != c.expected {
+		if got := HandleHttpMethod(c.input); got != c.expected {
 			t.Errorf("handleHttpMethod(%q) = %q, want %q", c.input, got, c.expected)
 		}
 	}
 }
 
 // URL Handling Tests
-func Test_handleUrl_valid(t *testing.T) {
+func Test_HandleUrl_valid(t *testing.T) {
 	url := "https://example.com"
-	got := handleUrl(url)
+	got := HandleUrl(url)
 	if got != url {
 		t.Errorf("handleUrl(%q) = %q, want %q", url, got, url)
 	}
 }
 
-func Test_handleUrl_invalid(t *testing.T) {
-	called := false
-	Exit = func(code int) { called = true }
-	defer func() { Exit = os.Exit }()
-	_ = handleUrl("ftp://example.com")
-	if !called {
-		t.Error("handleUrl should call Exit for invalid URL")
+func Test_HandleUrl_invalid(t *testing.T) {
+	result := HandleUrl("ftp://example.com")
+	if result != "" {
+		t.Errorf("handleUrl should return empty string for invalid URL, got: %q", result)
 	}
 }
 
@@ -110,37 +106,65 @@ func Test_fetchIpInfo_cache(t *testing.T) {
 }
 
 // HandleRequest Tests
-func Test_HandleRequest_invalid_url(t *testing.T) {
+func Test_RunRequest_invalid_url(t *testing.T) {
 	called := false
 	Exit = func(code int) { called = true }
 	defer func() { Exit = os.Exit }()
 
-	opts := RequestOptions{Url: "invalid", Method: "Get"}
-	_ = HandleRequest(opts)
+	opts := RequestOptions{Url: "invalid", Method: "GET"}
+	_ = RunRequest(opts)
 	if !called {
-		t.Error("HandleRequest should call Exit for invalid URL")
+		t.Error("RunRequest should call Exit for invalid URL")
 	}
 }
 
-func Test_HandleRequest_valid(t *testing.T) {
+func Test_RunRequest_execute_error(t *testing.T) {
+	called := false
+	Exit = func(code int) { called = true }
+	defer func() { Exit = os.Exit }()
+
+	opts := RequestOptions{
+		Url:     "https://error.com",
+		Method:  "GET",
+		Timeout: 1 * time.Second,
+	}
+
+	originalRestyNew := restyNew
+	restyNew = func() *resty.Client {
+		client := originalRestyNew()
+		client.OnBeforeRequest(func(c *resty.Client, r *resty.Request) error {
+			return fmt.Errorf("forced error")
+		})
+		return client
+	}
+	defer func() { restyNew = originalRestyNew }()
+
+	_ = RunRequest(opts)
+	if !called {
+		t.Error("RunRequest should call Exit for HTTP execution error")
+	}
+}
+
+func Test_RunRequest_valid(t *testing.T) {
+	headers := http.Header{}
+	headers.Add("Accept", "application/json")
 	opts := RequestOptions{
 		Timeout: 2 * time.Second,
-		Headers: map[string]string{"Accept": "application/json"},
-		Cookies: map[string]string{"testcookie": "testvalue"},
+		Headers: headers,
 		Url:     "https://google.com",
 		Method:  "GET",
 	}
 
-	resp := HandleRequest(opts)
+	resp := RunRequest(opts)
 	if resp.StatusCode != 200 && resp.StatusCode != 400 {
-		t.Errorf("HandleRequest returned wrong status code: %v", resp.StatusCode)
+		t.Errorf("RunRequest returned wrong status code: %v", resp.StatusCode)
 	}
 
 	if resp.Method != "GET" {
-		t.Errorf("HandleRequest returned wrong method: %v", resp.Method)
+		t.Errorf("RunRequest returned wrong method: %v", resp.Method)
 	}
 
 	if resp.Host == "" {
-		t.Errorf("HandleRequest returned empty host")
+		t.Errorf("RunRequest returned empty host")
 	}
 }

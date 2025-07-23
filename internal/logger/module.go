@@ -9,10 +9,10 @@ import (
 func Error(message string) {
 	borderStyle := lipgloss.
 		NewStyle().
-		Width(80).
+		Width(90).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("9")).
-		Padding(1, 1)
+		Padding(1, 2)
 
 	titleStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("9"))
 	messageStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ffffff"))
@@ -27,10 +27,10 @@ func Error(message string) {
 func Warn(message string) {
 	borderStyle := lipgloss.
 		NewStyle().
-		Width(50).
+		Width(90).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("3")).
-		Padding(1, 1)
+		Padding(1, 2)
 
 	titleStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("3"))
 	messageStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ffffff"))
@@ -45,10 +45,10 @@ func Warn(message string) {
 func Info(message string) {
 	borderStyle := lipgloss.
 		NewStyle().
-		Width(50).
+		Width(90).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("6")).
-		Padding(1, 1)
+		Padding(1, 2)
 
 	titleStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("6"))
 	messageStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ffffff"))

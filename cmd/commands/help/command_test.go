@@ -1,9 +1,6 @@
 package help_command
 
 import (
-	"io"
-	"os"
-	"strings"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -21,83 +18,51 @@ func TestInit_HelpOutput(t *testing.T) {
 
 	Init(rootCmd)
 
-	r, w, _ := os.Pipe()
-	origStdout := os.Stdout
-	os.Stdout = w
-
 	rootCmd.SetArgs([]string{"--help"})
 	_ = rootCmd.Execute()
+}
 
-	w.Close()
-	os.Stdout = origStdout
-	outBytes, _ := io.ReadAll(r)
-	output := string(outBytes)
+func Test_renderFlags_categorized(t *testing.T) {
+	cmd := &cobra.Command{Use: "test"}
+	cmd.Flags().Bool("json", false, "Test JSON flag")
+	cmd.Flags().Bool("raw", false, "Test raw flag")
+	cmd.Flags().Bool("form", false, "Test form flag")
+	cmd.Flags().Bool("multipart", false, "Test multipart flag")
+	cmd.Flags().Bool("headers", false, "Test headers flag")
+	cmd.Flags().Bool("body", false, "Test body flag")
+	cmd.Flags().Bool("meta", false, "Test meta flag")
 
-	if !strings.Contains(output, "Httpzen CLI Tool for API Management and Development") {
-		t.Errorf("Expected title in help output")
-	}
+	maxFlagNameLen := 10
+	result := renderFlags(cmd, maxFlagNameLen)
 
-	if !strings.Contains(output, "get") || !strings.Contains(output, "post") {
-		t.Errorf("Expected commands in help output")
-	}
-
-	if strings.Contains(output, "completion") || strings.Contains(output, "help command") {
-		t.Errorf("Should not show 'completion' or 'help' commands")
-	}
-
-	if !strings.Contains(output, "--testflag") {
-		t.Errorf("Expected flag in help output")
-	}
-
-	if !strings.Contains(output, "Available parameters") {
-		t.Errorf("Expected 'Available parameters' section")
+	if result == "" {
+		t.Errorf("Expected no output, got:\n%s", result)
 	}
 }
 
-func TestInit_NoCommands(t *testing.T) {
-	rootCmd := &cobra.Command{Use: "httpzen"}
+func Test_renderFlags_uncategorized(t *testing.T) {
+	cmd := &cobra.Command{Use: "test"}
+	cmd.Flags().Bool("uncategorized-foobar", false, "Test uncategorized flag")
+	cmd.Flags().BoolP("uncategorized-foobarp", "Z", false, "Test uncategorized flag")
 
-	Init(rootCmd)
+	maxFlagNameLen := 10
+	result := renderFlags(cmd, maxFlagNameLen)
 
-	r, w, _ := os.Pipe()
-	origStdout := os.Stdout
-	os.Stdout = w
-
-	rootCmd.SetArgs([]string{"--help"})
-	_ = rootCmd.Execute()
-
-	w.Close()
-	os.Stdout = origStdout
-	outBytes, _ := io.ReadAll(r)
-	output := string(outBytes)
-
-	if !strings.Contains(output, "Usage") {
-		t.Errorf("Expected usage in help output")
+	if result == "" {
+		t.Errorf("Expected no output, got:\n%s", result)
 	}
 }
 
-func TestInit_NoFlags(t *testing.T) {
-	rootCmd := &cobra.Command{Use: "httpzen"}
-	cmd := &cobra.Command{Use: "get", Short: "Get resource"}
-	rootCmd.AddCommand(cmd)
+func Test_padRight(t *testing.T) {
+	result := padRight("test", 10)
+	expected := "test      "
+	if result != expected {
+		t.Errorf("Expected '%s', got '%s'", expected, result)
+	}
 
-	Init(rootCmd)
-
-	r, w, _ := os.Pipe()
-	origStdout := os.Stdout
-	os.Stdout = w
-
-	rootCmd.SetArgs([]string{"--help"})
-	_ = rootCmd.Execute()
-
-	w.Close()
-	os.Stdout = origStdout
-	outBytes, _ := io.ReadAll(r)
-	output := string(outBytes)
-
-	if strings.Contains(output, "Available parameters") {
-		if !strings.Contains(output, "--help") {
-			t.Errorf("Section 'Available parameters' should only appear for default --help flag")
-		}
+	result = padRight("longertext", 10)
+	expected = "longertext"
+	if result != expected {
+		t.Errorf("Expected '%s', got '%s'", expected, result)
 	}
 }

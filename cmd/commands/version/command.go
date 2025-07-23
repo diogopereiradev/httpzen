@@ -26,10 +26,10 @@ func Init(rootCmd *cobra.Command) {
 			borderStyle := lipgloss.
 				NewStyle().
 				Border(lipgloss.RoundedBorder()).
-				BorderForeground(lipgloss.Color("86")).
+				BorderForeground(lipgloss.Color("6")).
 				Padding(1, 2)
 
-			fieldKeyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("86"))
+			fieldKeyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("6"))
 
 			var versionInfo string
 			versionInfo += titleStyle.Render("HTTPZen - Version information") + "\n\n"

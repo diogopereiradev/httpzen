@@ -24,56 +24,63 @@ type IpInfo struct {
 	ISP       string  `json:"isp,omitempty"`
 	State     string  `json:"state,omitempty"`
 	City      string  `json:"city,omitempty"`
+	Country   string  `json:"country,omitempty"`
 	Latitude  float64 `json:"latitude,omitempty"`
 	Longitude float64 `json:"longitude,omitempty"`
 }
 
 type RequestOptions struct {
-	Timeout      time.Duration     `json:"timeout"`
-	Headers      map[string]string `json:"headers"`
-	Body         string            `json:"body"`
-	Cookies      map[string]string `json:"cookies"`
-	Url          string            `json:"url"`
-	Method       string            `json:"method"`
-	SlowResponse bool              `json:"slow_response"`
+	Timeout time.Duration `json:"timeout"`
+	Headers http.Header   `json:"headers"`
+	Body    string        `json:"body"`
+	Url     string        `json:"url"`
+	Method  string        `json:"method"`
 }
 
 type RequestResponse struct {
-	StatusCode    int            `json:"status_code"`
-	ExecutionTime string         `json:"execution_time"`
-	Headers       http.Header    `json:"headers"`
-	Body          string         `json:"body"`
-	Cookies       []*http.Cookie `json:"cookies"`
-	Path          string         `json:"path"`
-	Host          string         `json:"host"`
-	Method        string         `json:"method"`
-	IpInfos       []IpInfo       `json:"ip_infos"`
-	SlowResponse  bool           `json:"slow_response"`
-	Result        string         `json:"result"`
+	HttpVersion     string         `json:"http_version"`
+	StatusMessage   string         `json:"status_message"`
+	StatusCode      int            `json:"status_code"`
+	ExecutionTime   float64        `json:"execution_time"`
+	RequestHeaders  http.Header    `json:"request_headers"`
+	ResponseHeaders http.Header    `json:"response_headers"`
+	Body            string         `json:"body"`
+	Cookies         []*http.Cookie `json:"cookies"`
+	Path            string         `json:"path"`
+	Host            string         `json:"host"`
+	Method          string         `json:"method"`
+	IpInfos         []IpInfo       `json:"ip_infos"`
+	SlowResponse    bool           `json:"slow_response"`
+	Result          string         `json:"result"`
 }
 
 var Exit = os.Exit
 
+var restyNew = resty.New
+
 var fetchIpInfoFunc = fetchIpInfo
 
-func HandleRequest(options RequestOptions) RequestResponse {
-	method := handleHttpMethod(options.Method)
-	url := handleUrl(options.Url)
+func RunRequest(options RequestOptions) RequestResponse {
+	method := HandleHttpMethod(options.Method)
+	url := HandleUrl(options.Url)
+	if url == "" {
+		logger_module.Error("Invalid URL. Please provide a valid URL (http:// or https://).")
+		Exit(1)
+		return RequestResponse{}
+	}
 
-	client := resty.New()
+	client := restyNew()
 	client.SetTimeout(options.Timeout)
 
 	req := client.R()
-	req.SetHeaders(options.Headers)
+	headers := make(map[string]string)
+	for k, v := range options.Headers {
+		if len(v) > 0 {
+			headers[k] = v[0]
+		}
+	}
+	req.SetHeaders(headers)
 	req.SetBody(options.Body)
-
-	var cookies []*http.Cookie
-	for k, v := range options.Cookies {
-		cookies = append(cookies, &http.Cookie{Name: k, Value: v})
-	}
-	if len(cookies) > 0 {
-		req.SetCookies(cookies)
-	}
 
 	startTime := time.Now()
 
@@ -81,39 +88,52 @@ func HandleRequest(options RequestOptions) RequestResponse {
 	if err != nil {
 		logger_module.Error("Failed to execute HTTP request: " + err.Error())
 		Exit(1)
+		return RequestResponse{}
 	}
 
 	executionTime := handleExecutionTimeInMilliseconds(startTime)
 	config := config_module.GetConfig()
 
 	return RequestResponse{
-		Result:        res.String(),
-		StatusCode:    res.StatusCode(),
-		ExecutionTime: fmt.Sprintf("%.2f", executionTime),
-		Headers:       res.Header(),
-		Body:          options.Body,
-		Cookies:       res.Cookies(),
-		Path:          res.Request.RawRequest.URL.Path,
-		Host:          res.Request.RawRequest.URL.Host,
-		Method:        res.Request.Method,
-		IpInfos:       handleDomainIpsLookup(res),
-		SlowResponse:  executionTime > float64(config.SlowResponseThreshold),
+		HttpVersion:     res.RawResponse.Proto,
+		Result:          res.String(),
+		StatusMessage:   res.Status(),
+		StatusCode:      res.StatusCode(),
+		ExecutionTime:   executionTime,
+		RequestHeaders:  options.Headers,
+		ResponseHeaders: res.Header(),
+		Body:            options.Body,
+		Cookies:         res.Cookies(),
+		Path:            res.Request.RawRequest.URL.Path,
+		Host:            res.Request.RawRequest.URL.Host,
+		Method:          res.Request.Method,
+		IpInfos:         handleDomainIpsLookup(res),
+		SlowResponse:    executionTime > float64(config.SlowResponseThreshold),
 	}
 }
 
-func handleHttpMethod(method string) string {
-	switch method {
-	case "Get", "Post", "Put", "Delete", "Patch", "Head":
-		return method
-	default:
+func HandleHttpMethod(method string) string {
+	switch strings.ToLower(method) {
+	case "get":
 		return "GET"
+	case "post":
+		return "POST"
+	case "put":
+		return "PUT"
+	case "delete":
+		return "DELETE"
+	case "patch":
+		return "PATCH"
+	case "head":
+		return "HEAD"
+	default:
+		return ""
 	}
 }
 
-func handleUrl(url string) string {
+func HandleUrl(url string) string {
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-		logger_module.Error("Please enter a valid URL: " + url)
-		Exit(1)
+		return ""
 	}
 	return url
 }
@@ -200,6 +220,7 @@ func fetchIpInfo(ipType string, ip string) (IpInfo, error) {
 		ASN:       resp.Org,
 		ISP:       resp.Org,
 		City:      resp.City,
+		Country:   resp.Country,
 		State:     resp.Region,
 		Latitude:  latitude,
 		Longitude: longitude,
@@ -213,6 +234,7 @@ func fetchIpInfo(ipType string, ip string) (IpInfo, error) {
 		"ASN":       info.ASN,
 		"ISP":       info.ISP,
 		"City":      info.City,
+		"Country":   info.Country,
 		"State":     info.State,
 		"Latitude":  info.Latitude,
 		"Longitude": info.Longitude,
