@@ -26,7 +26,7 @@ func request_headers_Render(m *Model) string {
 			keys = append(keys, key)
 		}
 	}
-	
+
 	sort.Strings(keys)
 
 	for i, key := range keys {
@@ -68,10 +68,14 @@ func request_headers_ScrollUp(m *Model) {
 func request_headers_ScrollDown(m *Model) {
 	maxLines := term_size.GetTerminalHeight(9999) - 16
 
-	if m.reqHeadersLinesAmount == 0 { return }
-	if m.reqHeadersLinesAmount <= maxLines { return }
+	if m.reqHeadersLinesAmount == 0 {
+		return
+	}
+	if m.reqHeadersLinesAmount <= maxLines {
+		return
+	}
 
-	if m.reqHeadersScrollOffset + maxLines >= m.reqHeadersLinesAmount {
+	if m.reqHeadersScrollOffset+maxLines >= m.reqHeadersLinesAmount {
 		return
 	} else {
 		m.reqHeadersScrollOffset++
@@ -87,7 +91,9 @@ func request_headers_ScrollPgUp(m *Model) {
 
 func request_headers_ScrollPgDown(m *Model) {
 	maxLines := term_size.GetTerminalHeight(9999) - 16
-	if m.reqHeadersLinesAmount == 0 || m.reqHeadersLinesAmount <= maxLines { return }
+	if m.reqHeadersLinesAmount == 0 || m.reqHeadersLinesAmount <= maxLines {
+		return
+	}
 
 	m.reqHeadersScrollOffset += 5
 }

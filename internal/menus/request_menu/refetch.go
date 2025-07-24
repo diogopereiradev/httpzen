@@ -8,20 +8,20 @@ import (
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 )
 
-type RefetchEvent struct{
+type RefetchEvent struct {
 	Response request_module.RequestResponse
 }
 
 func refetch_Render(m *Model) string {
 	content := lipgloss.
-	  NewStyle().
+		NewStyle().
 		Width(term_size.GetTerminalWidth(9999)).
 		Foreground(theme.Primary).
 		Render(logoascii.GetLogo(".request"))
-		
+
 	content += "\n\n"
 	content += lipgloss.
-	  NewStyle().
+		NewStyle().
 		Width(term_size.GetTerminalWidth(9999)).
 		Foreground(theme.LightText).
 		Background(theme.Primary).

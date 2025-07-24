@@ -63,7 +63,9 @@ func result_viewport_ScrollUp(m *Model) {
 }
 
 func result_viewport_ScrollDown(m *Model) {
-	if m.resultLinesAmount == 0 { return }
+	if m.resultLinesAmount == 0 {
+		return
+	}
 	if m.resultScrollOffset >= m.resultLinesAmount {
 		m.resultScrollOffset = m.resultLinesAmount - 1
 	} else {
@@ -79,6 +81,8 @@ func result_viewport_ScrollPgUp(m *Model) {
 }
 
 func result_viewport_ScrollPgDown(m *Model) {
-	if m.resultLinesAmount == 0 || m.resultLinesAmount <= term_size.GetTerminalHeight(9999) - 16 { return }
+	if m.resultLinesAmount == 0 || m.resultLinesAmount <= term_size.GetTerminalHeight(9999)-16 {
+		return
+	}
 	m.resultScrollOffset += 5
 }

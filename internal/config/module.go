@@ -8,8 +8,8 @@ import (
 )
 
 type Config struct {
-	SlowResponseThreshold int `json:"slow_response_threshold"`
-	HideLogomark         bool `json:"hide_logomark"`
+	SlowResponseThreshold int  `json:"slow_response_threshold"`
+	HideLogomark          bool `json:"hide_logomark"`
 }
 
 var CONFIG_NAME string = "config"
@@ -29,7 +29,7 @@ func GetConfig() Config {
 	}
 	return Config{
 		SlowResponseThreshold: v.GetInt("slow_response_threshold"),
-		HideLogomark:         v.GetBool("hide_logomark"),
+		HideLogomark:          v.GetBool("hide_logomark"),
 	}
 }
 
@@ -56,7 +56,7 @@ func UpdateConfig(newConfig Config) error {
 func InitConfig() Config {
 	config := Config{
 		SlowResponseThreshold: 500,
-		HideLogomark:         false,
+		HideLogomark:          false,
 	}
 
 	configPath := app_path_util.GetConfigPath()
@@ -67,7 +67,7 @@ func InitConfig() Config {
 	v := viper.New()
 	v.SetDefault("slow_response_threshold", config.SlowResponseThreshold)
 	v.SetDefault("hide_logomark", config.HideLogomark)
-	
+
 	v.SetConfigName(CONFIG_NAME)
 	v.SetConfigType(CONFIG_EXTENSION)
 	v.AddConfigPath(configPath)

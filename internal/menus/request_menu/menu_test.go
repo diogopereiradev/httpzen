@@ -37,16 +37,16 @@ func resetMocks() {
 
 type testModel struct{}
 
-func (m testModel) Init() tea.Cmd { return tea.Quit }
+func (m testModel) Init() tea.Cmd                           { return tea.Quit }
 func (m testModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-func (m testModel) View() string { return "" }
+func (m testModel) View() string                            { return "" }
 
 func TestRunProgram_CoverageReal(t *testing.T) {
-  prog := tea.NewProgram(testModel{})
-  _, err := RunProgram(prog)
-  if err != nil {
-    t.Errorf("RunProgram returned error: %v", err)
-  }
+	prog := tea.NewProgram(testModel{})
+	_, err := RunProgram(prog)
+	if err != nil {
+		t.Errorf("RunProgram returned error: %v", err)
+	}
 }
 
 func Test_initialModel(t *testing.T) {
@@ -176,14 +176,14 @@ func TestModel_View_AllTabs(t *testing.T) {
 		StatusCode:    200,
 		ExecutionTime: 1.0,
 		Headers:       http.Header{"X-Test": []string{"ok"}},
-		Body:          "body",
+		Body:          []request_module.RequestBody{{Key: "body", Value: "value"}},
 		Cookies:       nil,
 		Request: request_module.RequestOptions{
 			Url:     "url",
 			Method:  "GET",
 			Headers: http.Header{},
 			Timeout: 1,
-			Body:    "body",
+			Body:    []request_module.RequestBody{{Key: "body", Value: "value"}},
 		},
 		Path:    "/",
 		Host:    "localhost",
@@ -225,7 +225,7 @@ func TestModel_Update_Refetch(t *testing.T) {
 				Method:  "GET",
 				Headers: http.Header{},
 				Timeout: 1,
-				Body:    "body",
+				Body:    []request_module.RequestBody{{Key: "body", Value: "value"}},
 			},
 		},
 	}

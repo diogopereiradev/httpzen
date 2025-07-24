@@ -82,10 +82,14 @@ func network_infos_ScrollUp(m *Model) {
 func network_infos_ScrollDown(m *Model) {
 	maxLines := term_size.GetTerminalHeight(9999) - 16
 
-	if m.networkLinesAmount == 0 { return }
-	if m.networkLinesAmount <= maxLines { return }
+	if m.networkLinesAmount == 0 {
+		return
+	}
+	if m.networkLinesAmount <= maxLines {
+		return
+	}
 
-	if m.networkScrollOffset + maxLines >= m.networkLinesAmount {
+	if m.networkScrollOffset+maxLines >= m.networkLinesAmount {
 		return
 	} else {
 		m.networkScrollOffset++
@@ -101,7 +105,9 @@ func network_infos_ScrollPgUp(m *Model) {
 
 func network_infos_ScrollPgDown(m *Model) {
 	maxLines := term_size.GetTerminalHeight(9999) - 16
-	if m.networkLinesAmount == 0 || m.networkLinesAmount <= maxLines { return }
-	
+	if m.networkLinesAmount == 0 || m.networkLinesAmount <= maxLines {
+		return
+	}
+
 	m.networkScrollOffset += 5
 }

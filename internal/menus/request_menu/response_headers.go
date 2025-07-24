@@ -64,10 +64,14 @@ func response_headers_ScrollUp(m *Model) {
 func response_headers_ScrollDown(m *Model) {
 	maxLines := term_size.GetTerminalHeight(9999) - 16
 
-	if m.respHeadersLinesAmount == 0 { return }
-	if m.respHeadersLinesAmount <= maxLines { return }
+	if m.respHeadersLinesAmount == 0 {
+		return
+	}
+	if m.respHeadersLinesAmount <= maxLines {
+		return
+	}
 
-	if m.respHeadersScrollOffset + maxLines >= m.respHeadersLinesAmount {
+	if m.respHeadersScrollOffset+maxLines >= m.respHeadersLinesAmount {
 		return
 	} else {
 		m.respHeadersScrollOffset++

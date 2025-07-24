@@ -32,9 +32,9 @@ func basic_infos_Render(m *Model) string {
 	content += fieldTextStyle.Render("Response Time: ") + executionTime + "\n"
 	content += fieldTextStyle.Render("Response Size: ") + fmt.Sprintf("%d bytes", len(m.response.Result))
 
-	if m.response.Body != "" {
+	if len(m.response.Body) > 0 {
 		content += "\n"
-		content += fieldTextStyle.Render("\nRequest Body:\n" + m.response.Body)
+		content += fieldTextStyle.Render("\nRequest Body:\n" + m.response.Body[0].Value + "\n")
 	}
 	return content
 }
@@ -68,10 +68,14 @@ func basic_infos_ScrollUp(m *Model) {
 func basic_infos_ScrollDown(m *Model) {
 	maxLines := term_size.GetTerminalHeight(9999) - 16
 
-	if m.infosLinesAmount == 0 { return }
-	if m.infosLinesAmount <= maxLines { return }
+	if m.infosLinesAmount == 0 {
+		return
+	}
+	if m.infosLinesAmount <= maxLines {
+		return
+	}
 
-	if m.infosScrollOffset + maxLines >= m.infosLinesAmount {
+	if m.infosScrollOffset+maxLines >= m.infosLinesAmount {
 		return
 	} else {
 		m.infosScrollOffset++
@@ -87,7 +91,9 @@ func basic_infos_ScrollPgUp(m *Model) {
 
 func basic_infos_ScrollPgDown(m *Model) {
 	maxLines := term_size.GetTerminalHeight(9999) - 16
-	if m.infosLinesAmount == 0 || m.infosLinesAmount <= maxLines { return }
+	if m.infosLinesAmount == 0 || m.infosLinesAmount <= maxLines {
+		return
+	}
 
 	m.infosScrollOffset += 5
 }

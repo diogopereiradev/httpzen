@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 	"github.com/spf13/cobra"
 )
 
@@ -21,15 +22,15 @@ func Init(rootCmd *cobra.Command) {
 		Use:   "version",
 		Short: "Show the version of the application",
 		Run: func(cmd *cobra.Command, args []string) {
-			titleStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("227"))
+			titleStyle := lipgloss.NewStyle().Bold(true).Foreground(theme.Primary)
 
 			borderStyle := lipgloss.
 				NewStyle().
 				Border(lipgloss.RoundedBorder()).
-				BorderForeground(lipgloss.Color("6")).
+				BorderForeground(theme.Primary).
 				Padding(1, 2)
 
-			fieldKeyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("6"))
+			fieldKeyStyle := lipgloss.NewStyle().Foreground(theme.Secondary)
 
 			var versionInfo string
 			versionInfo += titleStyle.Render("HTTPZen - Version information") + "\n\n"

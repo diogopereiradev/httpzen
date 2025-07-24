@@ -72,7 +72,7 @@ func tab_Render(m *Model) string {
 		tabLabels...,
 	)
 
-	gap := tabGap.Render(strings.Repeat(" ", max(0, term_size.GetTerminalWidth(9999) - lipgloss.Width(row))))
+	gap := tabGap.Render(strings.Repeat(" ", max(0, term_size.GetTerminalWidth(9999)-lipgloss.Width(row))))
 	row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, gap)
 
 	return row

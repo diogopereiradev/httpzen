@@ -15,6 +15,12 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+type RequestBody struct {
+	ContentType string `json:"content_type"`
+	Key         string `json:"key,omitempty"` // Optional key for form data/multipart
+	Value       string `json:"value"`
+}
+
 type IpInfo struct {
 	Type      string  `json:"type"`
 	Ip        string  `json:"ip"`
@@ -32,26 +38,26 @@ type IpInfo struct {
 type RequestOptions struct {
 	Timeout time.Duration `json:"timeout"`
 	Headers http.Header   `json:"headers"`
-	Body    string        `json:"body"`
+	Body    []RequestBody `json:"body"`
 	Url     string        `json:"url"`
 	Method  string        `json:"method"`
 }
 
 type RequestResponse struct {
-	HttpVersion     string         `json:"http_version"`
-	StatusMessage   string         `json:"status_message"`
-	StatusCode      int            `json:"status_code"`
-	ExecutionTime   float64        `json:"execution_time"`
-	Headers         http.Header    `json:"headers"`
-	Body            string         `json:"body"`
-	Cookies         []*http.Cookie `json:"cookies"`
-	Request         RequestOptions `json:"request"`
-	Path            string         `json:"path"`
-	Host            string         `json:"host"`
-	Method          string         `json:"method"`
-	IpInfos         []IpInfo       `json:"ip_infos"`
-	SlowResponse    bool           `json:"slow_response"`
-	Result          string         `json:"result"`
+	HttpVersion   string         `json:"http_version"`
+	StatusMessage string         `json:"status_message"`
+	StatusCode    int            `json:"status_code"`
+	ExecutionTime float64        `json:"execution_time"`
+	Headers       http.Header    `json:"headers"`
+	Body          []RequestBody  `json:"body"`
+	Cookies       []*http.Cookie `json:"cookies"`
+	Request       RequestOptions `json:"request"`
+	Path          string         `json:"path"`
+	Host          string         `json:"host"`
+	Method        string         `json:"method"`
+	IpInfos       []IpInfo       `json:"ip_infos"`
+	SlowResponse  bool           `json:"slow_response"`
+	Result        string         `json:"result"`
 }
 
 var Exit = os.Exit
@@ -95,20 +101,20 @@ func RunRequest(options RequestOptions) RequestResponse {
 	config := config_module.GetConfig()
 
 	return RequestResponse{
-		HttpVersion:     res.RawResponse.Proto,
-		Result:          res.String(),
-		StatusMessage:   res.Status(),
-		StatusCode:      res.StatusCode(),
-		ExecutionTime:   executionTime,
-		Headers:         res.Header(),
-		Body:            options.Body,
-		Cookies:         res.Cookies(),
-		Path:            res.Request.RawRequest.URL.Path,
-		Host:            res.Request.RawRequest.URL.Host,
-		Method:          res.Request.Method,
-		IpInfos:         handleDomainIpsLookup(res),
-		SlowResponse:    executionTime > float64(config.SlowResponseThreshold),
-		Request:         RequestOptions{
+		HttpVersion:   res.RawResponse.Proto,
+		Result:        res.String(),
+		StatusMessage: res.Status(),
+		StatusCode:    res.StatusCode(),
+		ExecutionTime: executionTime,
+		Headers:       res.Header(),
+		Body:          HandleBody(&options),
+		Cookies:       res.Cookies(),
+		Path:          res.Request.RawRequest.URL.Path,
+		Host:          res.Request.RawRequest.URL.Host,
+		Method:        res.Request.Method,
+		IpInfos:       handleDomainIpsLookup(res),
+		SlowResponse:  executionTime > float64(config.SlowResponseThreshold),
+		Request: RequestOptions{
 			Url:     url,
 			Headers: options.Headers,
 			Method:  method,
@@ -135,6 +141,32 @@ func HandleHttpMethod(method string) string {
 	default:
 		return ""
 	}
+}
+
+func HandleBody(req *RequestOptions) []RequestBody {
+	if req.Body == nil {
+		return nil
+	}
+
+	contentTypeHeader := req.Headers.Get("Content-Type")
+
+	body := make([]RequestBody, 0, len(req.Body))
+	for _, b := range req.Body {
+		var contentType string
+
+		if contentTypeHeader != "" {
+			contentType = contentTypeHeader
+		} else {
+			contentType = b.ContentType
+		}
+
+		body = append(body, RequestBody{
+			ContentType: contentType,
+			Key:         b.Key,
+			Value:       b.Value,
+		})
+	}
+	return body
 }
 
 func HandleUrl(url string) string {

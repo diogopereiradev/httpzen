@@ -13,24 +13,20 @@ import (
 )
 
 var CategorizedFlags = map[string][]string{
-	"Main parameters":          {"help"},
-	"Data":                     {"header"},
-	"Predefined content types": {"json", "raw", "form", "multipart"},
-	"Output options":           {"headers", "body", "meta"},
+	"Main parameters": {"help"},
+	"Data":            {"header", "body"},
 }
 
 var CategorizedFlagsOrder = []string{
 	"Main parameters",
 	"Data",
-	"Predefined content types",
-	"Output options",
 }
 
 func padRight(str string, length int) string {
 	if len(str) >= length {
 		return str
 	}
-	return str + strings.Repeat(" ", length - len(str))
+	return str + strings.Repeat(" ", length-len(str))
 }
 
 func renderCommands(cmds []*cobra.Command, maxUseLen int) string {

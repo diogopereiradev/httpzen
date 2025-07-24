@@ -35,7 +35,7 @@ func makeModel() *Model {
 			Method:        "GET",
 			StatusMessage: "200 OK",
 			Result:        strings.Repeat("a", 200),
-			Body:          "request body",
+			Body:          []request_module.RequestBody{{Key: "body", Value: "request body"}},
 		},
 	}
 }
@@ -64,7 +64,7 @@ func Test_basic_infos_Render_Paged(t *testing.T) {
 	oldGetHeightFunc := term_size.GetHeightFunc
 	term_size.GetHeightFunc = func() (int, error) { return 5, nil }
 	defer func() { term_size.GetHeightFunc = oldGetHeightFunc }()
-	
+
 	out := basic_infos_Render_Paged(m)
 	t.Log("EXIT OF RENDER_PAGED:\n" + out)
 
@@ -179,7 +179,7 @@ func Test_basic_infos_ScrollPgDown(t *testing.T) {
 	oldGetHeightFunc := term_size.GetHeightFunc
 	term_size.GetHeightFunc = func() (int, error) { return 10, nil }
 	defer func() { term_size.GetHeightFunc = oldGetHeightFunc }()
-	
+
 	basic_infos_ScrollPgDown(m)
 	if m.infosScrollOffset != 5 {
 		t.Errorf("Expected 5, got %d", m.infosScrollOffset)
@@ -236,7 +236,7 @@ func Test_basic_infos_Render_Fast(t *testing.T) {
 
 func Test_basic_infos_Render_NoBody(t *testing.T) {
 	m := makeModel()
-	m.response.Body = ""
+	m.response.Body = []request_module.RequestBody{}
 
 	out := basic_infos_Render(m)
 	if strings.Contains(out, "Request Body:") {
