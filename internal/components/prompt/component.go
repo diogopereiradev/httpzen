@@ -8,6 +8,8 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	config_module "github.com/diogopereiradev/httpzen/internal/config"
+	logoascii "github.com/diogopereiradev/httpzen/internal/utils/logo_ascii"
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 )
 
@@ -71,6 +73,10 @@ func (p PromptImpl) Init() tea.Cmd {
 }
 
 func (p PromptImpl) View() string {
+	config := config_module.GetConfig()
+	
+	var output string
+
 	questionIcon := lipgloss.NewStyle().Foreground(theme.Warn).Render("?")
 	checkIcon := lipgloss.NewStyle().Foreground(theme.Success).Render("✓")
 	selectedStyle := lipgloss.NewStyle().Foreground(theme.Secondary)
@@ -110,10 +116,15 @@ func (p PromptImpl) View() string {
 		return questionIcon + " " + p.Title + " [" + vlen + "/" + maxlen + "]" + ": " + p.input.View() + "\n" + invalidStyle.Render(p.IncorrectTitleMessage)
 	}
 
-	if p.submited {
-		return checkIcon + " " + p.Title + " [" + vlen + "/" + maxlen + "]" + ": " + selectedStyle.Render(p.input.Value()) + "\n"
+	if !config.HideLogomark {
+		output += lipgloss.NewStyle().Foreground(theme.Primary).Render(logoascii.GetLogo(".body-builder")) + "\n"
 	}
-	return questionIcon + " " + p.Title + " [" + vlen + "/" + maxlen + "]" + ": " + p.input.View() + "\n"
+
+	if p.submited {
+		output += checkIcon + " " + p.Title + " [" + vlen + "/" + maxlen + "]" + ": " + selectedStyle.Render(p.input.Value()) + "\n"
+	}
+	output += questionIcon + " " + p.Title + " [" + vlen + "/" + maxlen + "]" + ": " + p.input.View() + "\n"
+	return output
 }
 
 func (p PromptImpl) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

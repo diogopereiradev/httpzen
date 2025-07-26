@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	request_module "github.com/diogopereiradev/httpzen/internal/request"
-	"github.com/diogopereiradev/httpzen/internal/utils/term_size"
+	"github.com/diogopereiradev/httpzen/internal/utils/ip_utility"
+	"github.com/diogopereiradev/httpzen/internal/utils/terminal_utility"
 	"github.com/stretchr/testify/assert"
 )
 
-func newModelWithIpInfos(ipInfos []request_module.IpInfo, scrollOffset int) *Model {
+func newModelWithIpInfos(ipInfos []ip_utility.LookupIpInfo, scrollOffset int) *Model {
 	return &Model{
 		response:            &request_module.RequestResponse{IpInfos: ipInfos},
 		networkScrollOffset: scrollOffset,
@@ -16,7 +17,7 @@ func newModelWithIpInfos(ipInfos []request_module.IpInfo, scrollOffset int) *Mod
 }
 
 func Test_network_infos_Render(t *testing.T) {
-	infos := []request_module.IpInfo{{
+	infos := []ip_utility.LookupIpInfo{{
 		Type: "IPv4", Ip: "1.2.3.4", Country: "BR", City: "SP", Decimal: "1234", Hostname: "host",
 		State: "SP", ASN: "AS123", ISP: "ISP", Latitude: 1.23, Longitude: 4.56,
 	}}
@@ -41,11 +42,11 @@ func Test_network_infos_Render_empty(t *testing.T) {
 }
 
 func Test_network_infos_Render_Paged(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 18, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 18, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
-	infos := []request_module.IpInfo{
+	infos := []ip_utility.LookupIpInfo{
 		{Type: "IPv4", Ip: "1.2.3.4"},
 		{Type: "IPv6", Ip: "::1"},
 	}
@@ -71,11 +72,11 @@ func Test_network_infos_ScrollUp(t *testing.T) {
 }
 
 func Test_network_infos_ScrollDown(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 18, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 18, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
-	m := newModelWithIpInfos([]request_module.IpInfo{{}, {}}, 0)
+	m := newModelWithIpInfos([]ip_utility.LookupIpInfo{{}, {}}, 0)
 	m.networkLinesAmount = 3
 	network_infos_ScrollDown(m)
 	assert.Equal(t, 1, m.networkScrollOffset)
@@ -84,9 +85,9 @@ func Test_network_infos_ScrollDown(t *testing.T) {
 }
 
 func Test_network_infos_ScrollDown_borders(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 20, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 20, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	m := newModelWithIpInfos(nil, 0)
 	m.networkLinesAmount = 0
@@ -106,20 +107,20 @@ func Test_network_infos_ScrollPgUp(t *testing.T) {
 }
 
 func Test_network_infos_ScrollPgDown(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 18, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 18, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
-	m := newModelWithIpInfos([]request_module.IpInfo{{}, {}, {}}, 0)
+	m := newModelWithIpInfos([]ip_utility.LookupIpInfo{{}, {}, {}}, 0)
 	m.networkLinesAmount = 3
 	network_infos_ScrollPgDown(m)
 	assert.Equal(t, 5, m.networkScrollOffset)
 }
 
 func Test_network_infos_ScrollPgDown_borders(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 20, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 20, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	m := newModelWithIpInfos(nil, 0)
 	m.networkLinesAmount = 0

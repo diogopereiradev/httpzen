@@ -1,7 +1,6 @@
 package request_command
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -11,11 +10,11 @@ import (
 	"github.com/diogopereiradev/httpzen/internal/menus/body_menu"
 	"github.com/diogopereiradev/httpzen/internal/menus/request_menu"
 	request_module "github.com/diogopereiradev/httpzen/internal/request"
+	"github.com/diogopereiradev/httpzen/internal/utils/http_utility"
 	"github.com/spf13/cobra"
 )
 
 type RequestFlags struct {
-	// Data
 	Headers []string
 	Body    bool
 }
@@ -44,13 +43,13 @@ func Init(rootCmd *cobra.Command) {
 			cmd.Help()
 			return
 		}
-		method := request_module.HandleHttpMethod(args[0])
+		method := http_utility.ParseHttpMethod(args[0])
 		if method == "" {
 			logger_module.Error("Invalid HTTP method. Please provide a valid HTTP method (GET, POST, PATCH, PUT, DELETE, HEAD).")
 			Exit(1)
 		}
 
-		url := request_module.HandleUrl(args[1])
+		url := http_utility.ParseUrl(args[1])
 		if url == "" {
 			logger_module.Error("Invalid URL. Please provide a valid URL (http:// or https://).")
 			Exit(1)
@@ -75,14 +74,11 @@ func Init(rootCmd *cobra.Command) {
 			Timeout: 30 * time.Second,
 		}
 
-		var body []request_module.RequestBody
+		var body []http_utility.HttpContentData
 		if flags.Body {
 			BodyMenuNewFunc(&requestOptions, &body)
-			return
 		}
 		requestOptions.Body = body
-
-		fmt.Println(requestOptions)
 
 		res := RunRequestFunc(requestOptions)
 		RequestMenuNewFunc(&res)

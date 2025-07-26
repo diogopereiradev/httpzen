@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	request_module "github.com/diogopereiradev/httpzen/internal/request"
-	"github.com/diogopereiradev/httpzen/internal/utils/term_size"
+	"github.com/diogopereiradev/httpzen/internal/utils/terminal_utility"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,9 +28,9 @@ func Test_response_headers_Render(t *testing.T) {
 }
 
 func Test_response_headers_Render_Paged(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 18, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 18, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	h := http.Header{"A": {"1"}, "B": {"2"}, "C": {"3"}}
 	m := newModelWithHeaders(h, 0)
@@ -40,7 +40,6 @@ func Test_response_headers_Render_Paged(t *testing.T) {
 	assert.NotContains(t, out, "C")
 	assert.Contains(t, out, "[1-2/3 lines]")
 
-	// Segunda página
 	m.respHeadersScrollOffset = 2
 	out2 := response_headers_Render_Paged(m)
 	assert.Contains(t, out2, "C")
@@ -58,9 +57,9 @@ func Test_response_headers_ScrollUp(t *testing.T) {
 }
 
 func Test_response_headers_ScrollDown(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 18, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 18, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	m := newModelWithHeaders(http.Header{"A": {"1"}, "B": {"2"}, "C": {"3"}}, 0)
 	m.respHeadersLinesAmount = 3
@@ -71,9 +70,9 @@ func Test_response_headers_ScrollDown(t *testing.T) {
 }
 
 func Test_response_headers_ScrollDown_borders(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 20, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 20, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	m := newModelWithHeaders(http.Header{"A": {"1"}}, 0)
 	m.respHeadersLinesAmount = 0
@@ -93,9 +92,9 @@ func Test_response_headers_ScrollPgUp(t *testing.T) {
 }
 
 func Test_response_headers_ScrollPgDown(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 18, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 18, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	m := newModelWithHeaders(http.Header{"A": {"1"}, "B": {"2"}, "C": {"3"}}, 0)
 	m.respHeadersLinesAmount = 3
@@ -104,9 +103,9 @@ func Test_response_headers_ScrollPgDown(t *testing.T) {
 }
 
 func Test_response_headers_ScrollPgDown_borders(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 20, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 20, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	m := newModelWithHeaders(http.Header{"A": {"1"}}, 0)
 	m.respHeadersLinesAmount = 0

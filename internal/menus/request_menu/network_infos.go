@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/diogopereiradev/httpzen/internal/utils/term_size"
+	"github.com/diogopereiradev/httpzen/internal/utils/terminal_utility"
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 )
 
@@ -58,7 +58,7 @@ func network_infos_Render_Paged(m *Model) string {
 
 	m.networkLinesAmount = len(lines)
 
-	maxLines := term_size.GetTerminalHeight(9999) - 16
+	maxLines := terminal_utility.GetTerminalHeight(9999) - 16
 
 	start := min(m.networkScrollOffset, len(lines))
 	end := min(start+maxLines, len(lines))
@@ -80,7 +80,7 @@ func network_infos_ScrollUp(m *Model) {
 }
 
 func network_infos_ScrollDown(m *Model) {
-	maxLines := term_size.GetTerminalHeight(9999) - 16
+	maxLines := terminal_utility.GetTerminalHeight(9999) - 16
 
 	if m.networkLinesAmount == 0 {
 		return
@@ -104,7 +104,7 @@ func network_infos_ScrollPgUp(m *Model) {
 }
 
 func network_infos_ScrollPgDown(m *Model) {
-	maxLines := term_size.GetTerminalHeight(9999) - 16
+	maxLines := terminal_utility.GetTerminalHeight(9999) - 16
 	if m.networkLinesAmount == 0 || m.networkLinesAmount <= maxLines {
 		return
 	}

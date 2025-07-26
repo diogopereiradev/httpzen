@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	request_module "github.com/diogopereiradev/httpzen/internal/request"
-	"github.com/diogopereiradev/httpzen/internal/utils/term_size"
+	"github.com/diogopereiradev/httpzen/internal/utils/terminal_utility"
 )
 
 func newModelWithResult(result string, scrollOffset int) *Model {
@@ -43,9 +43,9 @@ func Test_result_viewport_ScrollUp(t *testing.T) {
 }
 
 func Test_result_viewport_ScrollDown(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 24, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 24, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	m := newModelWithResult("a\nb\nc", 0)
 	m.resultLinesAmount = 3
@@ -75,9 +75,9 @@ func Test_result_viewport_ScrollPgUp(t *testing.T) {
 }
 
 func Test_result_viewport_ScrollPgDown(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 10, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 10, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	m := newModelWithResult(strings.Repeat("a\n", 30), 0)
 	m.resultLinesAmount = 30
@@ -93,9 +93,9 @@ func Test_result_viewport_ScrollPgDown_zeroLines(t *testing.T) {
 }
 
 func Test_result_viewport_ScrollPgDown_maxLines(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 20, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 20, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	m := newModelWithResult(strings.Repeat("a\n", 4), 0)
 	m.resultLinesAmount = 4
@@ -104,9 +104,9 @@ func Test_result_viewport_ScrollPgDown_maxLines(t *testing.T) {
 }
 
 func Test_result_viewport_Render_json(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 24, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 24, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	jsonStr := `{"foo": "bar", "num": 1}`
 	m := newModelWithResult(jsonStr, 0)
@@ -116,9 +116,9 @@ func Test_result_viewport_Render_json(t *testing.T) {
 }
 
 func Test_result_viewport_Render_html(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 24, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 24, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	htmlStr := `<html><body><h1>Title</h1></body></html>`
 	m := newModelWithResult(htmlStr, 0)
@@ -127,9 +127,9 @@ func Test_result_viewport_Render_html(t *testing.T) {
 }
 
 func Test_result_viewport_Render_xml(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 24, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 24, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	xmlStr := `<root><foo>bar</foo></root>`
 	m := newModelWithResult(xmlStr, 0)
@@ -138,9 +138,9 @@ func Test_result_viewport_Render_xml(t *testing.T) {
 }
 
 func Test_result_viewport_Render_default(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 24, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 24, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	m := newModelWithResult("plain text", 0)
 	output := result_viewport_Render(m)
@@ -148,9 +148,9 @@ func Test_result_viewport_Render_default(t *testing.T) {
 }
 
 func Test_result_viewport_Render_pagination(t *testing.T) {
-	origGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 3 + 16, nil }
-	defer func() { term_size.GetHeightFunc = origGetHeightFunc }()
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 3 + 16, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
 
 	lines := []string{"l1", "l2", "l3", "l4", "l5"}
 	m := newModelWithResult(strings.Join(lines, "\n"), 0)

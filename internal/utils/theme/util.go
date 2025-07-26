@@ -12,4 +12,6 @@ var (
 	Error   = lipgloss.AdaptiveColor{Light: "1", Dark: "1"}
 	Warn    = lipgloss.AdaptiveColor{Light: "11", Dark: "11"}
 	Success = lipgloss.AdaptiveColor{Light: "2", Dark: "2"}
+
+	CodeBlock = lipgloss.AdaptiveColor{Light: "#1f2836", Dark: "#1f2836"}
 )

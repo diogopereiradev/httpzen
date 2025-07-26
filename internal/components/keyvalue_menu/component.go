@@ -1,4 +1,4 @@
-package keyvalue_menu
+package keyvalue_menu_component
 
 import (
 	"fmt"
@@ -6,7 +6,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
-	"github.com/diogopereiradev/httpzen/internal/utils/term_size"
+	config_module "github.com/diogopereiradev/httpzen/internal/config"
+	logoascii "github.com/diogopereiradev/httpzen/internal/utils/logo_ascii"
+	"github.com/diogopereiradev/httpzen/internal/utils/terminal_utility"
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 )
 
@@ -126,6 +128,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *model) View() string {
+	config := config_module.GetConfig()
+
+	var output string
+
 	styleLabel := lipgloss.NewStyle().Foreground(theme.Secondary).Bold(true)
 	styleInput := lipgloss.NewStyle().Foreground(theme.LightText).Background(theme.DarkenText).Padding(0, 1)
 	styleSelected := lipgloss.NewStyle().Background(theme.Primary).Foreground(theme.LightText).Bold(true)
@@ -134,17 +140,22 @@ func (m *model) View() string {
 	questionIcon := lipgloss.NewStyle().Foreground(theme.Warn).Render("?")
 	checkIcon := lipgloss.NewStyle().Foreground(theme.Success).Render("✓")
 
-	if m.phase == "done" {
-		return checkIcon + " " + m.title + "\n"
+	if !config.HideLogomark {
+		output += lipgloss.NewStyle().Foreground(theme.Primary).Render(logoascii.GetLogo(".body-builder")) + "\n"
 	}
 
-	out := questionIcon + " " + m.title + "\n"
+	if m.phase == "done" {
+		output += checkIcon + " " + m.title + "\n"
+		return output
+	}
+
+	output += questionIcon + " " + m.title + "\n"
 
 	if len(m.pairs) > 0 {
 		t := table.New()
 		t.Border(lipgloss.RoundedBorder())
 		t.BorderStyle(lipgloss.NewStyle().Foreground(theme.Primary))
-		t.Width(term_size.GetTerminalWidth(80))
+		t.Width(terminal_utility.GetTerminalWidth(80))
 
 		t.Headers(greyText.Render("Key"), greyText.Render("Value"))
 		for i, kv := range m.pairs {
@@ -156,17 +167,17 @@ func (m *model) View() string {
 			}
 			t.Row(keyCell, valCell)
 		}
-		out += t.Render() + "\n\n"
+		output += t.Render() + "\n\n"
 	}
 
 	switch m.phase {
 	case "key":
-		out += styleLabel.Render("Key:") + " " + styleInput.Render(m.keyInput) + "\n"
-		out += lipgloss.NewStyle().Faint(true).Render("(Enter to confirm, empty to finish)  ↑/↓ navigate, DEL to remove")
+		output += styleLabel.Render("Key:") + " " + styleInput.Render(m.keyInput) + "\n"
+		output += lipgloss.NewStyle().Faint(true).Render("(Enter to confirm, empty to finish)  ↑/↓ navigate, DEL to remove")
 	case "value":
-		out += styleLabel.Render("Value to '") + m.keyInput + "': " + styleInput.Render(m.valInput) + "\n"
-		out += lipgloss.NewStyle().Faint(true).Render("(Enter to add, ESC to cancel)")
+		output += styleLabel.Render("Value to '") + m.keyInput + "': " + styleInput.Render(m.valInput) + "\n"
+		output += lipgloss.NewStyle().Faint(true).Render("(Enter to add, ESC to cancel)")
 	}
 
-	return out
+	return output
 }

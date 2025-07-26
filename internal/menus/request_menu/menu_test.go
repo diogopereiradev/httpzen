@@ -7,9 +7,10 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	timed_message_component "github.com/diogopereiradev/httpzen/internal/components/timed_message"
 	config_module "github.com/diogopereiradev/httpzen/internal/config"
 	request_module "github.com/diogopereiradev/httpzen/internal/request"
-	timed_message_util "github.com/diogopereiradev/httpzen/internal/utils/timed_message"
+	"github.com/diogopereiradev/httpzen/internal/utils/http_utility"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -162,7 +163,7 @@ func TestModel_View(t *testing.T) {
 		response: &request_module.RequestResponse{
 			Request: request_module.RequestOptions{},
 		},
-		clipboardTimedMessage: timed_message_util.NewTimedMessage(),
+		clipboardTimedMessage: timed_message_component.NewTimedMessage(),
 	}
 	m.activeTab = tab_Result
 	m.isRefetching = true
@@ -176,14 +177,14 @@ func TestModel_View_AllTabs(t *testing.T) {
 		StatusCode:    200,
 		ExecutionTime: 1.0,
 		Headers:       http.Header{"X-Test": []string{"ok"}},
-		Body:          []request_module.RequestBody{{Key: "body", Value: "value"}},
+		Body:          []http_utility.HttpContentData{{Key: "body", Value: "value"}},
 		Cookies:       nil,
 		Request: request_module.RequestOptions{
 			Url:     "url",
 			Method:  "GET",
 			Headers: http.Header{},
 			Timeout: 1,
-			Body:    []request_module.RequestBody{{Key: "body", Value: "value"}},
+			Body:    []http_utility.HttpContentData{{Key: "body", Value: "value"}},
 		},
 		Path:    "/",
 		Host:    "localhost",
@@ -211,7 +212,7 @@ func TestModel_View_AllTabs(t *testing.T) {
 
 	assert.NotContains(t, m.View(), ".request")
 
-	m.clipboardTimedMessage = timed_message_util.NewTimedMessage()
+	m.clipboardTimedMessage = timed_message_component.NewTimedMessage()
 	m.clipboardTimedMessage.Show("copied", 1)
 	_ = m.View()
 }
@@ -225,7 +226,7 @@ func TestModel_Update_Refetch(t *testing.T) {
 				Method:  "GET",
 				Headers: http.Header{},
 				Timeout: 1,
-				Body:    []request_module.RequestBody{{Key: "body", Value: "value"}},
+				Body:    []http_utility.HttpContentData{{Key: "body", Value: "value"}},
 			},
 		},
 	}
@@ -250,7 +251,7 @@ func TestModel_Update_Copy(t *testing.T) {
 	m := &Model{
 		config:                &config_module.Config{},
 		response:              &request_module.RequestResponse{Result: "copied"},
-		clipboardTimedMessage: timed_message_util.NewTimedMessage(),
+		clipboardTimedMessage: timed_message_component.NewTimedMessage(),
 	}
 	msg := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'c'}}
 

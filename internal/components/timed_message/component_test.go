@@ -1,4 +1,4 @@
-package timed_message_util
+package timed_message_component
 
 import (
 	"testing"

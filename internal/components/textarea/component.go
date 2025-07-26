@@ -1,4 +1,4 @@
-package textarea
+package textarea_component
 
 import (
 	"fmt"
@@ -7,6 +7,8 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	config_module "github.com/diogopereiradev/httpzen/internal/config"
+	logoascii "github.com/diogopereiradev/httpzen/internal/utils/logo_ascii"
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 )
 
@@ -65,6 +67,8 @@ func (p TextareaImpl) Init() tea.Cmd {
 }
 
 func (p TextareaImpl) View() string {
+	config := config_module.GetConfig()
+
 	var output string
 
 	questionIcon := lipgloss.NewStyle().Foreground(theme.Warn).Render("?")
@@ -89,6 +93,10 @@ func (p TextareaImpl) View() string {
 	maxlen := fmt.Sprintf("%d", p.MaxLength)
 	if p.MaxLength < 10 {
 		maxlen = "0" + maxlen
+	}
+
+	if !config.HideLogomark {
+		output += lipgloss.NewStyle().Foreground(theme.Primary).Render(logoascii.GetLogo(".body-builder")) + "\n"
 	}
 
 	if p.submited {

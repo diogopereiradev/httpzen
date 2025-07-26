@@ -1,4 +1,4 @@
-package select_menu
+package select_menu_component
 
 import (
 	"fmt"
@@ -7,6 +7,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	config_module "github.com/diogopereiradev/httpzen/internal/config"
+	logoascii "github.com/diogopereiradev/httpzen/internal/utils/logo_ascii"
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 )
 
@@ -85,6 +87,8 @@ func (m MenuImpl) FilteredChoices() []string {
 }
 
 func (m MenuImpl) View() string {
+	config := config_module.GetConfig()
+
 	var output string
 	filteredChoices := m.FilteredChoices()
 
@@ -116,6 +120,10 @@ func (m MenuImpl) View() string {
 		titleMessage = questionIcon + " " + m.Messages.Title + ": " + searchMessage + "\n\n"
 	} else {
 		titleMessage = questionIcon + " Select an option:" + searchMessage + "\n\n"
+	}
+
+	if !config.HideLogomark {
+		output += lipgloss.NewStyle().Foreground(theme.Primary).Render(logoascii.GetLogo(".body-builder")) + "\n"
 	}
 
 	if m.Border {

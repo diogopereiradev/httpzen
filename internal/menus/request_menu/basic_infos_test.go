@@ -6,7 +6,8 @@ import (
 
 	config_module "github.com/diogopereiradev/httpzen/internal/config"
 	request_module "github.com/diogopereiradev/httpzen/internal/request"
-	"github.com/diogopereiradev/httpzen/internal/utils/term_size"
+	"github.com/diogopereiradev/httpzen/internal/utils/http_utility"
+	"github.com/diogopereiradev/httpzen/internal/utils/terminal_utility"
 )
 
 func MinTestHelper(a, b int) int {
@@ -35,7 +36,7 @@ func makeModel() *Model {
 			Method:        "GET",
 			StatusMessage: "200 OK",
 			Result:        strings.Repeat("a", 200),
-			Body:          []request_module.RequestBody{{Key: "body", Value: "request body"}},
+			Body:          []http_utility.HttpContentData{{Key: "body", Value: "request body"}},
 		},
 	}
 }
@@ -61,9 +62,9 @@ func Test_basic_infos_Render_Paged(t *testing.T) {
 	m := makeModel()
 	m.response.Result = strings.Repeat("line\n", 30)
 
-	oldGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 5, nil }
-	defer func() { term_size.GetHeightFunc = oldGetHeightFunc }()
+	oldGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 5, nil }
+	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
 
 	out := basic_infos_Render_Paged(m)
 	t.Log("EXIT OF RENDER_PAGED:\n" + out)
@@ -97,9 +98,9 @@ func Test_basic_infos_ScrollDown(t *testing.T) {
 	m := makeModel()
 	m.infosLinesAmount = 100
 
-	oldGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 10, nil }
-	defer func() { term_size.GetHeightFunc = oldGetHeightFunc }()
+	oldGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 10, nil }
+	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
 
 	m.infosScrollOffset = 0
 
@@ -113,9 +114,9 @@ func Test_basic_infos_ScrollDown_NoLines(t *testing.T) {
 	m := makeModel()
 	m.infosLinesAmount = 0
 
-	oldGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 10, nil }
-	defer func() { term_size.GetHeightFunc = oldGetHeightFunc }()
+	oldGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 10, nil }
+	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
 
 	m.infosScrollOffset = 0
 
@@ -129,10 +130,10 @@ func Test_basic_infos_ScrollDown_AtEnd(t *testing.T) {
 	m := makeModel()
 	m.infosLinesAmount = 15
 
-	oldGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 10, nil }
-	defer func() { term_size.GetHeightFunc = oldGetHeightFunc }()
-	term_size.GetHeightFunc = func() (int, error) { return 20, nil }
+	oldGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 10, nil }
+	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
+	terminal_utility.GetHeightFunc = func() (int, error) { return 20, nil }
 
 	m.infosScrollOffset = 11
 
@@ -146,9 +147,9 @@ func Test_basic_infos_ScrollDown_TooFewLinesForScroll(t *testing.T) {
 	m := makeModel()
 	m.infosLinesAmount = 5
 
-	oldGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 50, nil }
-	defer func() { term_size.GetHeightFunc = oldGetHeightFunc }()
+	oldGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 50, nil }
+	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
 	m.infosScrollOffset = 0
 
 	basic_infos_ScrollDown(m)
@@ -176,9 +177,9 @@ func Test_basic_infos_ScrollPgDown(t *testing.T) {
 	m := makeModel()
 	m.infosLinesAmount = 100
 
-	oldGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 10, nil }
-	defer func() { term_size.GetHeightFunc = oldGetHeightFunc }()
+	oldGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 10, nil }
+	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
 
 	basic_infos_ScrollPgDown(m)
 	if m.infosScrollOffset != 5 {
@@ -236,7 +237,7 @@ func Test_basic_infos_Render_Fast(t *testing.T) {
 
 func Test_basic_infos_Render_NoBody(t *testing.T) {
 	m := makeModel()
-	m.response.Body = []request_module.RequestBody{}
+	m.response.Body = []http_utility.HttpContentData{}
 
 	out := basic_infos_Render(m)
 	if strings.Contains(out, "Request Body:") {
@@ -248,9 +249,9 @@ func Test_basic_infos_Render_Paged_NoScroll(t *testing.T) {
 	m := makeModel()
 	m.response.Result = strings.Repeat("line\n", 2)
 
-	oldGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 50, nil }
-	defer func() { term_size.GetHeightFunc = oldGetHeightFunc }()
+	oldGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 50, nil }
+	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
 
 	out := basic_infos_Render_Paged(m)
 	if strings.Contains(out, "scroll") {
@@ -262,9 +263,9 @@ func Test_basic_infos_ScrollDown_NoAdvance(t *testing.T) {
 	m := makeModel()
 	m.infosLinesAmount = 5
 
-	oldGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 50, nil }
-	defer func() { term_size.GetHeightFunc = oldGetHeightFunc }()
+	oldGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 50, nil }
+	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
 
 	m.infosScrollOffset = 0
 
@@ -278,9 +279,9 @@ func Test_basic_infos_ScrollPgDown_NoAdvance(t *testing.T) {
 	m := makeModel()
 	m.infosLinesAmount = 5
 
-	oldGetHeightFunc := term_size.GetHeightFunc
-	term_size.GetHeightFunc = func() (int, error) { return 50, nil }
-	defer func() { term_size.GetHeightFunc = oldGetHeightFunc }()
+	oldGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 50, nil }
+	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
 
 	m.infosScrollOffset = 0
 

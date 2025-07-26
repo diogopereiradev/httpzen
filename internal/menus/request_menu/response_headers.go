@@ -7,7 +7,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
-	"github.com/diogopereiradev/httpzen/internal/utils/term_size"
+	"github.com/diogopereiradev/httpzen/internal/utils/terminal_utility"
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 )
 
@@ -27,7 +27,7 @@ func response_headers_Render(m *Model) string {
 
 	for i, key := range keys {
 		value := m.response.Headers[key]
-		content += ansi.Wrap(keyTextStyle.Render(key)+": "+value[0], term_size.GetTerminalWidth(9999), "")
+		content += ansi.Wrap(keyTextStyle.Render(key)+": "+value[0], terminal_utility.GetTerminalWidth(9999), "")
 		if i < len(keys)-1 {
 			content += "\n"
 		}
@@ -41,7 +41,7 @@ func response_headers_Render_Paged(m *Model) string {
 
 	m.respHeadersLinesAmount = len(lines)
 
-	maxLines := term_size.GetTerminalHeight(9999) - 16
+	maxLines := terminal_utility.GetTerminalHeight(9999) - 16
 	start := min(m.respHeadersScrollOffset, len(lines))
 	end := min(start+maxLines, len(lines))
 
@@ -62,7 +62,7 @@ func response_headers_ScrollUp(m *Model) {
 }
 
 func response_headers_ScrollDown(m *Model) {
-	maxLines := term_size.GetTerminalHeight(9999) - 16
+	maxLines := terminal_utility.GetTerminalHeight(9999) - 16
 
 	if m.respHeadersLinesAmount == 0 {
 		return
@@ -86,7 +86,7 @@ func response_headers_ScrollPgUp(m *Model) {
 }
 
 func response_headers_ScrollPgDown(m *Model) {
-	maxLines := term_size.GetTerminalHeight(9999) - 16
+	maxLines := terminal_utility.GetTerminalHeight(9999) - 16
 	if m.respHeadersLinesAmount == 0 || m.respHeadersLinesAmount <= maxLines {
 		return
 	}

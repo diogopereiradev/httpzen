@@ -7,13 +7,13 @@ import (
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	timed_message_component "github.com/diogopereiradev/httpzen/internal/components/timed_message"
 	config_module "github.com/diogopereiradev/httpzen/internal/config"
 	logger_module "github.com/diogopereiradev/httpzen/internal/logger"
 	request_module "github.com/diogopereiradev/httpzen/internal/request"
 	logoascii "github.com/diogopereiradev/httpzen/internal/utils/logo_ascii"
-	"github.com/diogopereiradev/httpzen/internal/utils/term_clear"
+	"github.com/diogopereiradev/httpzen/internal/utils/terminal_utility"
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
-	timed_message_util "github.com/diogopereiradev/httpzen/internal/utils/timed_message"
 )
 
 type Model struct {
@@ -22,7 +22,7 @@ type Model struct {
 	config   *config_module.Config
 	response *request_module.RequestResponse
 
-	clipboardTimedMessage *timed_message_util.TimedMessage
+	clipboardTimedMessage *timed_message_component.TimedMessage
 
 	isRefetching bool
 
@@ -47,7 +47,7 @@ var LoggerError = logger_module.Error
 var TeaNewProgram = tea.NewProgram
 var RunRequestFunc = request_module.RunRequest
 var ClipboardWriteAll = clipboard.WriteAll
-var TermClear = term_clear.Clear
+var TermClear = terminal_utility.Clear
 var RunProgram = func(p *tea.Program) (tea.Model, error) {
 	return p.Run()
 }
@@ -58,7 +58,7 @@ func initialModel(res *request_module.RequestResponse, config *config_module.Con
 		activeTab:             tab_Result,
 		response:              res,
 		isRefetching:          false,
-		clipboardTimedMessage: timed_message_util.NewTimedMessage(),
+		clipboardTimedMessage: timed_message_component.NewTimedMessage(),
 	}
 }
 

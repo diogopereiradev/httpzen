@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/diogopereiradev/httpzen/internal/utils/term_size"
+	"github.com/diogopereiradev/httpzen/internal/utils/terminal_utility"
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 )
 
@@ -72,7 +72,7 @@ func tab_Render(m *Model) string {
 		tabLabels...,
 	)
 
-	gap := tabGap.Render(strings.Repeat(" ", max(0, term_size.GetTerminalWidth(9999)-lipgloss.Width(row))))
+	gap := tabGap.Render(strings.Repeat(" ", max(0, terminal_utility.GetTerminalWidth(9999)-lipgloss.Width(row))))
 	row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, gap)
 
 	return row

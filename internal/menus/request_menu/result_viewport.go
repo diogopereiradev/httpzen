@@ -6,10 +6,10 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
-	"github.com/diogopereiradev/httpzen/internal/utils/content_type"
 	"github.com/diogopereiradev/httpzen/internal/utils/html_formatter"
+	"github.com/diogopereiradev/httpzen/internal/utils/http_utility"
 	"github.com/diogopereiradev/httpzen/internal/utils/json_formatter"
-	"github.com/diogopereiradev/httpzen/internal/utils/term_size"
+	"github.com/diogopereiradev/httpzen/internal/utils/terminal_utility"
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 )
 
@@ -17,21 +17,21 @@ func result_viewport_Render(m *Model) string {
 	var result string
 
 	fieldTextStyle := lipgloss.NewStyle().Foreground(theme.Secondary)
-	maxLines := term_size.GetTerminalHeight(9999) - 16
+	maxLines := terminal_utility.GetTerminalHeight(9999) - 16
 
 	if m.response.Result != "" {
 		var formatted string
-		contentType := content_type.Detect(m.response.Result)
+		contentType := http_utility.DetectContentType(m.response.Result)
 
 		switch contentType {
 		case "json":
-			formatted = ansi.Wrap(json_formatter.FormatJSON(m.response.Result), term_size.GetTerminalWidth(9999), "")
+			formatted = ansi.Wrap(json_formatter.FormatJSON(m.response.Result), terminal_utility.GetTerminalWidth(9999), "")
 		case "html":
-			formatted = ansi.Wrap(html_formatter.FormatHTML(m.response.Result), term_size.GetTerminalWidth(9999), "")
+			formatted = ansi.Wrap(html_formatter.FormatHTML(m.response.Result), terminal_utility.GetTerminalWidth(9999), "")
 		case "xml":
-			formatted = ansi.Wrap(html_formatter.FormatHTML(m.response.Result), term_size.GetTerminalWidth(9999), "")
+			formatted = ansi.Wrap(html_formatter.FormatHTML(m.response.Result), terminal_utility.GetTerminalWidth(9999), "")
 		default:
-			formatted = ansi.Wrap(m.response.Result, term_size.GetTerminalWidth(9999), "")
+			formatted = ansi.Wrap(m.response.Result, terminal_utility.GetTerminalWidth(9999), "")
 		}
 
 		lines := strings.Split(formatted, "\n")
@@ -81,7 +81,7 @@ func result_viewport_ScrollPgUp(m *Model) {
 }
 
 func result_viewport_ScrollPgDown(m *Model) {
-	if m.resultLinesAmount == 0 || m.resultLinesAmount <= term_size.GetTerminalHeight(9999)-16 {
+	if m.resultLinesAmount == 0 || m.resultLinesAmount <= terminal_utility.GetTerminalHeight(9999)-16 {
 		return
 	}
 	m.resultScrollOffset += 5

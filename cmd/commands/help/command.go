@@ -6,7 +6,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	logoascii "github.com/diogopereiradev/httpzen/internal/utils/logo_ascii"
-	"github.com/diogopereiradev/httpzen/internal/utils/term_size"
+	"github.com/diogopereiradev/httpzen/internal/utils/terminal_utility"
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -105,7 +105,7 @@ func Init(rootCmd *cobra.Command) {
 	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
 		borderStyle := lipgloss.
 			NewStyle().
-			Width(term_size.GetTerminalWidth(90)).
+			Width(terminal_utility.GetTerminalWidth(90)).
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(theme.Primary).
 			Padding(0, 3)
