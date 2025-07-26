@@ -45,13 +45,13 @@ func Init(rootCmd *cobra.Command) {
 		}
 		method := http_utility.ParseHttpMethod(args[0])
 		if method == "" {
-			logger_module.Error("Invalid HTTP method. Please provide a valid HTTP method (GET, POST, PATCH, PUT, DELETE, HEAD).")
+			logger_module.Error("Invalid HTTP method. Please provide a valid HTTP method (GET, POST, PATCH, PUT, DELETE, HEAD).", 70)
 			Exit(1)
 		}
 
 		url := http_utility.ParseUrl(args[1])
 		if url == "" {
-			logger_module.Error("Invalid URL. Please provide a valid URL (http:// or https://).")
+			logger_module.Error("Invalid URL. Please provide a valid URL (http:// or https://).", 70)
 			Exit(1)
 		}
 
@@ -62,7 +62,7 @@ func Init(rootCmd *cobra.Command) {
 		}
 
 		if flags.Body && (method == "GET" || method == "HEAD") {
-			logger_module.Error("Body cannot be included in GET or HEAD requests.")
+			logger_module.Error("Body cannot be included in GET or HEAD requests.", 70)
 			Exit(1)
 			return
 		}

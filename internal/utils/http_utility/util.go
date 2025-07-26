@@ -32,7 +32,7 @@ func ParseApplicationJson(data HttpContentData) HandleParseResult {
 	var jsonData any
 
 	if err := json.Unmarshal([]byte(data.Value), &jsonData); err != nil {
-		logger_module.Error("Failed to parse JSON body: " + err.Error())
+		logger_module.Error("Failed to parse JSON body: " + err.Error(), 70)
 		return HandleParseResult{}
 	}
 	return HandleParseResult{ContentTypeHeader: data.ContentType, Result: jsonData}

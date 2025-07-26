@@ -116,14 +116,14 @@ func Test_New_all_types(t *testing.T) {
 	keyvalue_menu_component.New = mockKeyValueMenu([]keyvalue_menu_component.KeyValue{{Key: "k", Value: "v"}})
 
 	TermClear = func() {}
-	ErrorLogger = func(string) {}
+	ErrorLogger = func(string, int) {}
 	Exit = func(code int) { panic(code) }
 	defer func() {
 		select_menu_component.New = origSelectMenu
 		textarea_component.New = origTextarea
 		keyvalue_menu_component.New = origKeyValueMenu
 		TermClear = terminal_utility.Clear
-		ErrorLogger = func(string) {}
+		ErrorLogger = func(string, int) {}
 		Exit = os.Exit
 	}()
 
@@ -160,7 +160,7 @@ func Test_New_all_types(t *testing.T) {
 
 func Test_New_invalid_type(t *testing.T) {
 	TermClear = func() {}
-	ErrorLogger = func(string) {}
+	ErrorLogger = func(string, int) {}
 
 	var exited bool
 	Exit = func(code int) { exited = true }
@@ -169,7 +169,7 @@ func Test_New_invalid_type(t *testing.T) {
 	defer func() {
 		select_menu_component.New = origSelectMenu
 		Exit = os.Exit
-		ErrorLogger = func(string) {}
+		ErrorLogger = func(string, int) {}
 		TermClear = terminal_utility.Clear
 	}()
 
