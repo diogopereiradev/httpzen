@@ -12,6 +12,8 @@ import (
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 )
 
+var New = NewComponent
+
 type KeyValue struct {
 	Key   string
 	Value string
@@ -34,7 +36,7 @@ type model struct {
 	onSubmit func([]KeyValue)
 }
 
-func New(menu KeyValueMenuImpl) {
+func NewComponent(menu KeyValueMenuImpl) {
 	m := &model{
 		title:    menu.Title,
 		onSubmit: menu.OnSubmit,

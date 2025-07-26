@@ -12,6 +12,8 @@ import (
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 )
 
+var New = NewComponent
+
 type TextareaImpl struct {
 	Title     string
 	Events    TextareaEvents
@@ -24,7 +26,7 @@ type TextareaEvents struct {
 	OnSubmit func(result string)
 }
 
-func New(options TextareaImpl) {
+func NewComponent(options TextareaImpl) {
 	input := textarea.New()
 	input.CharLimit = options.MaxLength
 	input.FocusedStyle.LineNumber = lipgloss.NewStyle().Foreground(theme.DarkenText)

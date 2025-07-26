@@ -18,13 +18,10 @@ func basic_infos_Render(m *Model) string {
 
 	greyTextStyle := lipgloss.NewStyle().Foreground(theme.DarkenText)
 	fieldTextStyle := lipgloss.NewStyle().Foreground(theme.Secondary)
-	specialFieldTextStyle := lipgloss.NewStyle().Foreground(theme.Primary)
 
 	greenFieldTextStyle := lipgloss.NewStyle().Foreground(theme.Success)
 	yellowFieldTextStyle := lipgloss.NewStyle().Foreground(theme.Warn)
 	redFieldTextStyle := lipgloss.NewStyle().Foreground(theme.Error)
-
-	requestBodyStyle := lipgloss.NewStyle().Width(terminal_utility.GetTerminalWidth(9999)).Background(theme.CodeBlock).Padding(1, 1)
 
 	var executionTime string
 	if m.response.ExecutionTime > float64(m.config.SlowResponseThreshold) {
@@ -39,48 +36,8 @@ func basic_infos_Render(m *Model) string {
 	content += fieldTextStyle.Render("URL: ") + m.response.Request.Url + "\n"
 	content += fieldTextStyle.Render("Response Time: ") + executionTime + "\n"
 	content += fieldTextStyle.Render("Response Size: ") + fmt.Sprintf("%d bytes", len(m.response.Result))
+	content += basic_infos_body_Render(m)
 
-	if len(m.response.Body) > 0 {
-		content += "\n"
-		content += fieldTextStyle.Render("Request Body:") + "\n\n"
-
-		for i, body := range m.response.Body {
-			if i > 0 && i < len(m.response.Body) {
-				content += "\n\n"
-			}
-			content += specialFieldTextStyle.Render("Content type: ") + body.ContentType + "\n"
-			content += specialFieldTextStyle.Render("Content length: ") + fmt.Sprintf("%d bytes", len(body.Value)) + "\n"
-
-			if fileInfo, err := http_utility.GetFileByPath(body.Value); err == nil {
-				content += specialFieldTextStyle.Render("File status: ") + greenFieldTextStyle.Render("Found and accessible") + "\n"
-				content += specialFieldTextStyle.Render("File name: ") + fileInfo.Name + "\n"
-			} else if fileInfo.PathIsValid {
-				content += specialFieldTextStyle.Render("File status: ") + redFieldTextStyle.Render("Not found or inaccessible") + "\n"
-			}
-
-			content += specialFieldTextStyle.Render("Content: ") + "\n\n"
-			
-			if body.Key != "" {
-				content += ansi.Wrap(greenFieldTextStyle.Render("Key: ") + body.Key, terminal_utility.GetTerminalWidth(9999), "") + "\n"
-				content += ansi.Wrap(greenFieldTextStyle.Render("Value: ") + body.Value, terminal_utility.GetTerminalWidth(9999), "")
-			} else {
-				switch body.ContentType {
-			  case "application/json":
-				  content += ansi.Wrap(requestBodyStyle.Render(json_formatter.FormatJSON(body.Value)), terminal_utility.GetTerminalWidth(9999), "") + "\n"
-				case "text/plain":
-					content += ansi.Wrap(requestBodyStyle.Render(body.Value), terminal_utility.GetTerminalWidth(9999), "") + "\n"
-				case "text/html":
-					content += ansi.Wrap(html_formatter.FormatHTML(requestBodyStyle.Render(body.Value)), terminal_utility.GetTerminalWidth(9999), "") + "\n"
-				default:
-					content += ansi.Wrap(requestBodyStyle.Render(body.Value), terminal_utility.GetTerminalWidth(9999), "") + "\n"
-				}
-			}
-
-	  	if i >= len(m.response.Body) - 1 {
-   			content += "\n"
- 	  	}
-		}
-	}
 	return content
 }
 
@@ -113,12 +70,8 @@ func basic_infos_ScrollUp(m *Model) {
 func basic_infos_ScrollDown(m *Model) {
 	maxLines := terminal_utility.GetTerminalHeight(9999) - 16
 
-	if m.infosLinesAmount == 0 {
-		return
-	}
-	if m.infosLinesAmount <= maxLines {
-		return
-	}
+	if m.infosLinesAmount == 0 { return }
+	if m.infosLinesAmount <= maxLines { return }
 
 	if m.infosScrollOffset+maxLines >= m.infosLinesAmount {
 		return
@@ -141,4 +94,62 @@ func basic_infos_ScrollPgDown(m *Model) {
 	}
 
 	m.infosScrollOffset += 5
+}
+
+func basic_infos_body_Render(m *Model) string {
+	var content string
+
+	greenFieldTextStyle := lipgloss.NewStyle().Foreground(theme.Success)
+	yellowFieldTextStyle := lipgloss.NewStyle().Foreground(theme.Warn)
+	redFieldTextStyle := lipgloss.NewStyle().Foreground(theme.Error)
+
+	fieldTextStyle := lipgloss.NewStyle().Foreground(theme.Secondary)
+	specialFieldTextStyle := lipgloss.NewStyle().Foreground(theme.Primary)
+	requestBodyStyle := lipgloss.NewStyle().Width(terminal_utility.GetTerminalWidth(9999)).Background(theme.CodeBlock).Padding(1, 1)
+
+	content += "\n"
+	content += fieldTextStyle.Render("Request Body:") + "\n\n"
+
+	if len(m.response.Body) == 0 {
+		content += yellowFieldTextStyle.Render("No request body available.") + "\n"
+		return content;
+	}
+
+	for i, body := range m.response.Body {
+		if i > 0 && i < len(m.response.Body) {
+			content += "\n\n"
+		}
+		content += specialFieldTextStyle.Render("Content type: ") + body.ContentType + "\n"
+		content += specialFieldTextStyle.Render("Content length: ") + fmt.Sprintf("%d bytes", len(body.Value)) + "\n"
+
+		if fileInfo, err := http_utility.GetFileByPath(body.Value); err == nil {
+			content += specialFieldTextStyle.Render("File status: ") + greenFieldTextStyle.Render("Found and accessible") + "\n"
+			content += specialFieldTextStyle.Render("File name: ") + fileInfo.Name + "\n"
+		} else if fileInfo.PathIsValid {
+			content += specialFieldTextStyle.Render("File status: ") + redFieldTextStyle.Render("Not found or inaccessible") + "\n"
+		}
+
+		content += specialFieldTextStyle.Render("Content: ") + "\n\n"
+		
+		if body.Key != "" {
+			content += ansi.Wrap(greenFieldTextStyle.Render("Key: ") + body.Key, terminal_utility.GetTerminalWidth(9999), "") + "\n"
+			content += ansi.Wrap(greenFieldTextStyle.Render("Value: ") + body.Value, terminal_utility.GetTerminalWidth(9999), "")
+		} else {
+			switch body.ContentType {
+		  case "application/json":
+			  content += ansi.Wrap(requestBodyStyle.Render(json_formatter.FormatJSON(body.Value)), terminal_utility.GetTerminalWidth(9999), "") + "\n"
+			case "text/plain":
+				content += ansi.Wrap(requestBodyStyle.Render(body.Value), terminal_utility.GetTerminalWidth(9999), "") + "\n"
+			case "text/html":
+				content += ansi.Wrap(html_formatter.FormatHTML(requestBodyStyle.Render(body.Value)), terminal_utility.GetTerminalWidth(9999), "") + "\n"
+			default:
+				content += ansi.Wrap(requestBodyStyle.Render(body.Value), terminal_utility.GetTerminalWidth(9999), "") + "\n"
+			}
+		}
+
+		if i >= len(m.response.Body) - 1 {
+  		content += "\n"
+ 		}
+	}
+	return content
 }

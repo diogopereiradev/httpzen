@@ -6,25 +6,27 @@ REPOSITORY := $(shell grep "\[REPOSITORY\]" -A 1 METADATA | awk 'NR==2')
 CURRENT_DATETIME := $(shell date +%Y-%m-%d\ %H:%M:%S)
 LICENSE := $(shell head -n 1 LICENSE)
 
+INTERNAL_DIRS := $(shell find ./internal -mindepth 1 -maxdepth 1 -type d -not -name components -printf './internal/%f/... ')
+
 # Public targets
 build: clean lint .build .build-linux .build-windows .build-debian .build-rpm .build-flatpak
 
 test:
 	@echo "\033[33m[Make]\033[0m \033[32mRunning tests...\033[0m"
 	@go install gotest.tools/gotestsum@v1.12.3
-	@env TEST_ENV=true gotestsum ./...
+	@env TEST_ENV=true gotestsum ./cmd/commands/... $(INTERNAL_DIRS) -- -count=1
 	@echo "\033[33m[Make]\033[0m \033[32mTests completed.\033[0m"
 
 test_cov:
 	@echo "\033[33m[Make]\033[0m \033[32mRunning tests with coverage...\033[0m"
 	@go install gotest.tools/gotestsum@v1.12.3
-	@env TEST_ENV=true gotestsum ./cmd/commands/... ./internal/... -coverprofile=coverage.out
+	@env TEST_ENV=true gotestsum ./cmd/commands/... $(INTERNAL_DIRS) -coverprofile=coverage.out
 	@echo "\033[33m[Make]\033[0m \033[32mTests with coverage completed.\033[0m"
 
 test_cov_ui:
 	@echo "\033[33m[Make]\033[0m \033[32mRunning tests with coverage...\033[0m"
 	@go install gotest.tools/gotestsum@v1.12.3
-	@env TEST_ENV=true gotestsum ./cmd/commands/... ./internal/... -coverprofile=coverage.out && go tool cover -html=coverage.out
+	@env TEST_ENV=true gotestsum ./cmd/commands/... $(INTERNAL_DIRS) -coverprofile=coverage.out && go tool cover -html=coverage.out
 	@echo "\033[33m[Make]\033[0m \033[32mTests with coverage completed.\033[0m"
 
 lint:

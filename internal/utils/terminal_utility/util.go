@@ -8,7 +8,7 @@ import (
 	"golang.org/x/term"
 )
 
-var getSizeFunc = func() (int, error) {
+var GetWidthFunc = func() (int, error) {
 	width, _, err := term.GetSize(int(os.Stdout.Fd()))
 	return width, err
 }
@@ -29,7 +29,7 @@ var getGOOS = func() string {
 var clear map[string]func()
 
 func GetTerminalWidth(max int) int {
-	width, err := getSizeFunc()
+	width, err := GetWidthFunc()
 	if err != nil || width <= 0 {
 		return max
 	}
@@ -54,8 +54,6 @@ func Clear() {
 	value, ok := clear[getGOOS()]
 	if ok {
 		value()
-	} else {
-		return
 	}
 }
 

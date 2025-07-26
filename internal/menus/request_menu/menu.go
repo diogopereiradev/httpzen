@@ -48,6 +48,7 @@ var TeaNewProgram = tea.NewProgram
 var RunRequestFunc = request_module.RunRequest
 var ClipboardWriteAll = clipboard.WriteAll
 var TermClear = terminal_utility.Clear
+
 var RunProgram = func(p *tea.Program) (tea.Model, error) {
 	return p.Run()
 }

@@ -11,7 +11,7 @@ import (
 )
 
 func setupTestCache() func() {
-	cacheFileName = "ip_cache_test"
+	CacheFileName = "ip_cache_test"
 	cacheViper = newCacheViper()
 	configPath := app_path_util.GetConfigPath()
 	_ = os.MkdirAll(configPath, 0755)
@@ -64,4 +64,19 @@ func TestSetIpInfoToCache_FilePersistence(t *testing.T) {
 
 	stored := v.GetStringMap("10_0_0_1")
 	assert.Equal(t, info, stored)
+}
+
+func TestClearCache(t *testing.T) {
+	teardown := setupTestCache()
+	defer teardown()
+
+	ip := "10.0.0.1"
+	info := map[string]any{"country": "US", "city": "New York"}
+	SetIpInfoToCache(ip, info)
+
+	ClearCache()
+
+	result, ok := GetIpInfoFromCache(ip)
+	assert.False(t, ok)
+	assert.Nil(t, result)
 }

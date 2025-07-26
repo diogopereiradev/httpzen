@@ -12,6 +12,8 @@ import (
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 )
 
+var New = NewComponent
+
 type MenuImpl struct {
 	Choices    []string
 	Messages   MenuMessages
@@ -32,7 +34,7 @@ type MenuEvents struct {
 	OnSelect func(choice int)
 }
 
-func New(options MenuImpl) {
+func NewComponent(options MenuImpl) {
 	impl := MenuImpl{
 		Choices:    options.Choices,
 		Events:     options.Events,

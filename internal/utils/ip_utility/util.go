@@ -10,6 +10,10 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+var IpLookupFunc = net.LookupIP
+
+var IpInfoApiUrlFormat = "https://ipinfo.io/%s/json"
+
 type LookupIpInfo struct {
 	Type      string  `json:"type"`
 	Ip        string  `json:"ip"`
@@ -33,7 +37,7 @@ func FetchIpInfo(ipType string, ip string) (LookupIpInfo, error) {
 		return info, nil
 	}
 
-	apiUrl := fmt.Sprintf("https://ipinfo.io/%s/json", ip)
+	apiUrl := fmt.Sprintf(IpInfoApiUrlFormat, ip)
 	client := resty.New()
 	res, _ := client.R().Get(apiUrl)
 
@@ -98,7 +102,7 @@ func LookupDomainIps(res *resty.Response) []LookupIpInfo {
 	if strings.Contains(host, ":") {
 		host = strings.Split(host, ":")[0]
 	}
-	ips, err := net.LookupIP(host)
+	ips, err := IpLookupFunc(host)
 	if err != nil {
 		return []LookupIpInfo{}
 	}
@@ -113,11 +117,9 @@ func LookupDomainIps(res *resty.Response) []LookupIpInfo {
 		}
 
 		ipInfo, err := FetchIpInfo(ipType, ip.String())
-		if err != nil {
-			continue
+		if err == nil {
+			ipList = append(ipList, ipInfo)
 		}
-
-		ipList = append(ipList, ipInfo)
 	}
 	return ipList
 }

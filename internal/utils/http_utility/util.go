@@ -62,9 +62,7 @@ func ParseMultipartFormData(data []HttpContentData) HandleParseResult {
 			}
 			writer.WriteField(pair[0], pair[1])
 		} else {
-			if marshaled, err := json.Marshal(unmarshalResult); err != nil {
-				writer.WriteField(pair[0], pair[1])
-			} else {
+			if marshaled, err := json.Marshal(unmarshalResult); err == nil {
 				writer.WriteField(part.Key, string(marshaled))
 			}
 		}

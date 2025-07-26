@@ -13,38 +13,48 @@ import (
 )
 
 type RequestOptions struct {
-	Timeout time.Duration                         `json:"timeout"`
-	Headers http.Header                           `json:"headers"`
-	Body    []http_utility.HttpContentData        `json:"body"`
-	Url     string                                `json:"url"`
-	Method  string                                `json:"method"`
-}
-
-type RequestResponse struct {
-	HttpVersion   string                                 `json:"http_version"`
-	StatusMessage string                                 `json:"status_message"`
-	StatusCode    int                                    `json:"status_code"`
-	ExecutionTime float64                                `json:"execution_time"`
-	Headers       http.Header                            `json:"headers"`
-	Body          []http_utility.HttpContentData         `json:"body"`
-	Cookies       []*http.Cookie                         `json:"cookies"`
-	Request       RequestOptions                         `json:"request"`
-	Path          string                                 `json:"path"`
-	Host          string                                 `json:"host"`
-	Method        string                                 `json:"method"`
-	IpInfos       []ip_utility.LookupIpInfo              `json:"ip_infos"`
-	SlowResponse  bool                                   `json:"slow_response"`
-	Result        string                                 `json:"result"`
+	Timeout time.Duration                  `json:"timeout"`
+	Headers http.Header                    `json:"headers"`
+	Body    []http_utility.HttpContentData `json:"body"`
+	Url     string                         `json:"url"`
+	Method  string                         `json:"method"`
 }
 
 var Exit = os.Exit
+
 var restyNew = resty.New
+var parseHttpMethod = http_utility.ParseHttpMethod
+var parseUrl = http_utility.ParseUrl
+var parseExecutionTimeInMilliseconds = http_utility.ParseExecutionTimeInMilliseconds
+var getConfig = config_module.GetConfig
+var lookupDomainIps = ip_utility.LookupDomainIps
+var loggerError = logger_module.Error
+var parseApplicationJson = http_utility.ParseApplicationJson
+var parseMultipartFormData = http_utility.ParseMultipartFormData
+var parseUrlEncodedForm = http_utility.ParseUrlEncodedForm
+
+type RequestResponse struct {
+	HttpVersion   string                         `json:"http_version"`
+	StatusMessage string                         `json:"status_message"`
+	StatusCode    int                            `json:"status_code"`
+	ExecutionTime float64                        `json:"execution_time"`
+	Headers       http.Header                    `json:"headers"`
+	Body          []http_utility.HttpContentData `json:"body"`
+	Cookies       []*http.Cookie                 `json:"cookies"`
+	Request       RequestOptions                 `json:"request"`
+	Path          string                         `json:"path"`
+	Host          string                         `json:"host"`
+	Method        string                         `json:"method"`
+	IpInfos       []ip_utility.LookupIpInfo      `json:"ip_infos"`
+	SlowResponse  bool                           `json:"slow_response"`
+	Result        string                         `json:"result"`
+}
 
 func RunRequest(options RequestOptions) RequestResponse {
-	method := http_utility.ParseHttpMethod(options.Method)
-	url := http_utility.ParseUrl(options.Url)
+	method := parseHttpMethod(options.Method)
+	url := parseUrl(options.Url)
 	if url == "" {
-		logger_module.Error("Invalid URL. Please provide a valid URL (http:// or https://).")
+		loggerError("Invalid URL. Please provide a valid URL (http:// or https://).")
 		Exit(1)
 		return RequestResponse{}
 	}
@@ -73,13 +83,13 @@ func RunRequest(options RequestOptions) RequestResponse {
 
 	res, err := req.Execute(method, url)
 	if err != nil {
-		logger_module.Error("Failed to execute HTTP request: " + err.Error())
+		loggerError("Failed to execute HTTP request: " + err.Error())
 		Exit(1)
 		return RequestResponse{}
 	}
 
-	executionTime := http_utility.ParseExecutionTimeInMilliseconds(startTime)
-	config := config_module.GetConfig()
+	executionTime := parseExecutionTimeInMilliseconds(startTime)
+	config := getConfig()
 
 	return RequestResponse{
 		HttpVersion:   res.RawResponse.Proto,
@@ -93,7 +103,7 @@ func RunRequest(options RequestOptions) RequestResponse {
 		Path:          res.Request.RawRequest.URL.Path,
 		Host:          res.Request.RawRequest.URL.Host,
 		Method:        res.Request.Method,
-		IpInfos:       ip_utility.LookupDomainIps(res),
+		IpInfos:       lookupDomainIps(res),
 		SlowResponse:  executionTime > float64(config.SlowResponseThreshold),
 		Request: RequestOptions{
 			Url:     url,
@@ -113,15 +123,15 @@ func HandleBody(body []http_utility.HttpContentData) http_utility.HandleParseRes
 	contentType := body[0].ContentType
 
 	if contentType == "application/json" {
-		return http_utility.ParseApplicationJson(body[0])
+		return parseApplicationJson(body[0])
 	}
 
 	if contentType == "multipart/form-data" {
-		return http_utility.ParseMultipartFormData(body)
+		return parseMultipartFormData(body)
 	}
 
 	if contentType == "application/x-www-form-urlencoded" {
-		return http_utility.ParseUrlEncodedForm(body)
+		return parseUrlEncodedForm(body)
 	}
 
 	return http_utility.HandleParseResult{

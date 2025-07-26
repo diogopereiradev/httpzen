@@ -31,7 +31,12 @@ func New(req *request_module.RequestOptions, bodyPointer *[]http_utility.HttpCon
 		PerPage: 5,
 		Events: select_menu_component.MenuEvents{
 			OnSelect: func(choice int) {
-				contentType = choices[choice]
+				if choice >= 0 && choice < len(choices) {
+					contentType = choices[choice]
+				} else {
+					ErrorLogger("Invalid Content-Type selected.")
+					Exit(1)
+				}
 			},
 		},
 	})
@@ -104,7 +109,7 @@ func xWWWFormUrlEncodedMenu() []http_utility.HttpContentData {
 	var resultPairs []keyvalue_menu_component.KeyValue
 
 	keyvalue_menu_component.New(keyvalue_menu_component.KeyValueMenuImpl{
-		Title:    "Add fields to application/x-www-form-urlencoded",
+		Title: "Add fields to application/x-www-form-urlencoded",
 		OnSubmit: func(pairs []keyvalue_menu_component.KeyValue) {
 			resultPairs = pairs
 		},
@@ -120,13 +125,12 @@ func xWWWFormUrlEncodedMenu() []http_utility.HttpContentData {
 	return bodyResult
 }
 
-
 func multipartFormDataMenu() []http_utility.HttpContentData {
 	bodyResult := []http_utility.HttpContentData{}
 	var resultPairs []keyvalue_menu_component.KeyValue
 
 	keyvalue_menu_component.New(keyvalue_menu_component.KeyValueMenuImpl{
-		Title:    "Add fields to multipart/form-data",
+		Title: "Add fields to multipart/form-data",
 		OnSubmit: func(pairs []keyvalue_menu_component.KeyValue) {
 			resultPairs = pairs
 		},

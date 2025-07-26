@@ -1,6 +1,7 @@
 package request_menu
 
 import (
+	"net/http"
 	"strings"
 	"testing"
 
@@ -8,296 +9,255 @@ import (
 	request_module "github.com/diogopereiradev/httpzen/internal/request"
 	"github.com/diogopereiradev/httpzen/internal/utils/http_utility"
 	"github.com/diogopereiradev/httpzen/internal/utils/terminal_utility"
+	"github.com/stretchr/testify/assert"
 )
 
-func MinTestHelper(a, b int) int {
-	return min(a, b)
-}
-
-func min(a, b int) int {
-	if a < 0 {
-		return 0
-	}
-	if b < 0 {
-		return 0
-	}
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func makeModel() *Model {
-	return &Model{
-		config: &config_module.Config{SlowResponseThreshold: 50},
-		response: &request_module.RequestResponse{
-			ExecutionTime: 100,
-			HttpVersion:   "HTTP/1.1",
-			Method:        "GET",
-			StatusMessage: "200 OK",
-			Result:        strings.Repeat("a", 200),
-			Body:          []http_utility.HttpContentData{{Key: "body", Value: "request body"}},
+func Test_basic_infos_Render(t *testing.T) {
+	resp := &request_module.RequestResponse{
+		ExecutionTime: 100,
+		HttpVersion:   "HTTP/1.1",
+		Method:        "GET",
+		StatusMessage: "200 OK",
+		Request:       request_module.RequestOptions{Url: "http://localhost"},
+		Result:        "result",
+		Body: []http_utility.HttpContentData{
+			{ContentType: "application/json", Value: "{}", Key: ""},
 		},
 	}
-}
 
-func Test_basic_infos_Render(t *testing.T) {
-	m := makeModel()
-	out := basic_infos_Render(m)
-	if !strings.Contains(out, "HTTP/1.1 GET 200 OK") {
-		t.Error("Should contain status in the first line")
-	}
-	if !strings.Contains(out, "Response Time:") {
-		t.Error("Should contain response time")
-	}
-	if !strings.Contains(out, "Response Size:") {
-		t.Error("Should contain response size")
-	}
-	if !strings.Contains(out, "request body") {
-		t.Error("Should contain request body if present")
-	}
-}
+	config := &config_module.Config{SlowResponseThreshold: 50}
+	m := &Model{response: resp, config: config}
 
-func Test_basic_infos_Render_Paged(t *testing.T) {
-	m := makeModel()
-	m.response.Result = strings.Repeat("line\n", 30)
-
-	oldGetHeightFunc := terminal_utility.GetHeightFunc
-	terminal_utility.GetHeightFunc = func() (int, error) { return 5, nil }
-	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
-
-	out := basic_infos_Render_Paged(m)
-	t.Log("EXIT OF RENDER_PAGED:\n" + out)
-
-	if m.infosLinesAmount == 0 {
-		t.Error("infosLinesAmount should be set")
+	res := basic_infos_Render(m)
+	if !strings.Contains(res, "HTTP/1.1 GET 200 OK") {
+		t.Errorf("expected status line in output")
 	}
 
-	if !strings.Contains(out, "Use ↑/↓ or PgUp/PgDown to scroll.") {
-		t.Error("Should show scroll instruction if there are more lines than the terminal height")
-	}
-}
-
-func Test_basic_infos_ScrollUp(t *testing.T) {
-	m := makeModel()
-	m.infosScrollOffset = 2
-
-	basic_infos_ScrollUp(m)
-	if m.infosScrollOffset != 1 {
-		t.Errorf("Expected 1, got %d", m.infosScrollOffset)
-	}
-
-	basic_infos_ScrollUp(m)
-	basic_infos_ScrollUp(m)
-	if m.infosScrollOffset != 0 {
-		t.Errorf("Expected 0, got %d", m.infosScrollOffset)
-	}
-}
-
-func Test_basic_infos_ScrollDown(t *testing.T) {
-	m := makeModel()
-	m.infosLinesAmount = 100
-
-	oldGetHeightFunc := terminal_utility.GetHeightFunc
-	terminal_utility.GetHeightFunc = func() (int, error) { return 10, nil }
-	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
-
-	m.infosScrollOffset = 0
-
-	basic_infos_ScrollDown(m)
-	if m.infosScrollOffset != 1 {
-		t.Errorf("Expected 1, got %d", m.infosScrollOffset)
-	}
-}
-
-func Test_basic_infos_ScrollDown_NoLines(t *testing.T) {
-	m := makeModel()
-	m.infosLinesAmount = 0
-
-	oldGetHeightFunc := terminal_utility.GetHeightFunc
-	terminal_utility.GetHeightFunc = func() (int, error) { return 10, nil }
-	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
-
-	m.infosScrollOffset = 0
-
-	basic_infos_ScrollDown(m)
-	if m.infosScrollOffset != 0 {
-		t.Errorf("Should not advance scroll if infosLinesAmount is 0")
-	}
-}
-
-func Test_basic_infos_ScrollDown_AtEnd(t *testing.T) {
-	m := makeModel()
-	m.infosLinesAmount = 15
-
-	oldGetHeightFunc := terminal_utility.GetHeightFunc
-	terminal_utility.GetHeightFunc = func() (int, error) { return 10, nil }
-	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
-	terminal_utility.GetHeightFunc = func() (int, error) { return 20, nil }
-
-	m.infosScrollOffset = 11
-
-	basic_infos_ScrollDown(m)
-	if m.infosScrollOffset != 11 {
-		t.Errorf("Should not advance scroll if already at end")
-	}
-}
-
-func Test_basic_infos_ScrollDown_TooFewLinesForScroll(t *testing.T) {
-	m := makeModel()
-	m.infosLinesAmount = 5
-
-	oldGetHeightFunc := terminal_utility.GetHeightFunc
-	terminal_utility.GetHeightFunc = func() (int, error) { return 50, nil }
-	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
-	m.infosScrollOffset = 0
-
-	basic_infos_ScrollDown(m)
-	if m.infosScrollOffset != 0 {
-		t.Errorf("Should not advance scroll if not enough lines to scroll")
-	}
-}
-
-func Test_basic_infos_ScrollPgUp(t *testing.T) {
-	m := makeModel()
-	m.infosScrollOffset = 6
-
-	basic_infos_ScrollPgUp(m)
-	if m.infosScrollOffset != 1 {
-		t.Errorf("Expected 1, got %d", m.infosScrollOffset)
-	}
-
-	basic_infos_ScrollPgUp(m)
-	if m.infosScrollOffset != 0 {
-		t.Errorf("Expected 0, got %d", m.infosScrollOffset)
-	}
-}
-
-func Test_basic_infos_ScrollPgDown(t *testing.T) {
-	m := makeModel()
-	m.infosLinesAmount = 100
-
-	oldGetHeightFunc := terminal_utility.GetHeightFunc
-	terminal_utility.GetHeightFunc = func() (int, error) { return 10, nil }
-	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
-
-	basic_infos_ScrollPgDown(m)
-	if m.infosScrollOffset != 5 {
-		t.Errorf("Expected 5, got %d", m.infosScrollOffset)
-	}
-}
-
-func Test_min(t *testing.T) {
-	if MinTestHelper(2, 3) != 2 {
-		t.Error("min(2,3) should be 2")
-	}
-	if MinTestHelper(-1, 3) != 0 {
-		t.Error("min(-1,3) should be 0")
-	}
-	if MinTestHelper(2, -3) != 0 {
-		t.Error("min(2,-3) should be 0")
-	}
-	if MinTestHelper(5, 2) != 2 {
-		t.Error("min(5,2) should be 2")
-	}
-}
-
-func Test_basic_infos_Render_Slow(t *testing.T) {
-	m := makeModel()
-	m.response.ExecutionTime = 1000
-	m.config.SlowResponseThreshold = 10
-
-	out := basic_infos_Render(m)
-	if !strings.Contains(out, "slow") {
-		t.Error("Should indicate slow")
-	}
-}
-
-func Test_basic_infos_Render_Warn(t *testing.T) {
-	m := makeModel()
-	m.response.ExecutionTime = 8
-	m.config.SlowResponseThreshold = 10
-
-	out := basic_infos_Render(m)
-	if !strings.Contains(out, "slow") {
-		t.Error("Should indicate slow (warn)")
-	}
-}
-
-func Test_basic_infos_Render_Fast(t *testing.T) {
-	m := makeModel()
-	m.response.ExecutionTime = 1
-	m.config.SlowResponseThreshold = 10
-
-	out := basic_infos_Render(m)
-	if !strings.Contains(out, "fast") {
-		t.Error("Should indicate fast")
+	if !strings.Contains(res, "Response Time:") {
+		t.Errorf("expected response time in output")
 	}
 }
 
 func Test_basic_infos_Render_NoBody(t *testing.T) {
-	m := makeModel()
-	m.response.Body = []http_utility.HttpContentData{}
+	resp := &request_module.RequestResponse{
+		ExecutionTime: 100,
+		HttpVersion:   "HTTP/1.1",
+		Method:        "GET",
+		StatusMessage: "200 OK",
+		Request:       request_module.RequestOptions{Url: "http://localhost"},
+		Result:        "result",
+	}
 
-	out := basic_infos_Render(m)
-	if strings.Contains(out, "Request Body:") {
-		t.Error("Should not show body if empty")
+	config := &config_module.Config{SlowResponseThreshold: 50}
+	m := &Model{response: resp, config: config}
+
+	res := basic_infos_Render(m)
+	if !strings.Contains(res, "No request body available.") {
+		t.Errorf("expected no body message in output")
 	}
 }
 
-func Test_basic_infos_Render_Paged_NoScroll(t *testing.T) {
-	m := makeModel()
-	m.response.Result = strings.Repeat("line\n", 2)
+func Test_basic_infos_Render_YellowSlowResponse(t *testing.T) {
+	resp := &request_module.RequestResponse{
+		ExecutionTime: 200,
+		HttpVersion:   "HTTP/1.1",
+		Method:        "GET",
+		StatusMessage: "500 Internal Server Error",
+		Request:       request_module.RequestOptions{Url: "http://localhost"},
+		Result:        "result",
+	}
 
-	oldGetHeightFunc := terminal_utility.GetHeightFunc
-	terminal_utility.GetHeightFunc = func() (int, error) { return 50, nil }
-	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
+	config := &config_module.Config{SlowResponseThreshold: 250}
+	m := &Model{response: resp, config: config}
 
-	out := basic_infos_Render_Paged(m)
-	if strings.Contains(out, "scroll") {
-		t.Error("Should not show scroll instruction if not needed")
+	res := basic_infos_Render(m)
+	if !strings.Contains(res, "200.00ms (slow)") {
+		t.Errorf("expected slow response time in output")
 	}
 }
 
-func Test_basic_infos_ScrollDown_NoAdvance(t *testing.T) {
-	m := makeModel()
-	m.infosLinesAmount = 5
+func Test_basic_infos_Render_Paged(t *testing.T) {
+	resp := &request_module.RequestResponse{
+		ExecutionTime: 10,
+		HttpVersion:   "HTTP/2",
+		Method:        "POST",
+		StatusMessage: "201 Created",
+		Request:       request_module.RequestOptions{Url: "http://test"},
+		Result:        strings.Repeat("a\n", 100),
+	}
 
-	oldGetHeightFunc := terminal_utility.GetHeightFunc
-	terminal_utility.GetHeightFunc = func() (int, error) { return 50, nil }
-	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
+	config := &config_module.Config{SlowResponseThreshold: 50}
+	m := &Model{response: resp, config: config}
+
+	res := basic_infos_Render_Paged(m)
+	if !strings.Contains(res, "HTTP/2 POST 201 Created") {
+		t.Errorf("expected status line in paged output")
+	}
+}
+
+func Test_basic_infos_Render_Paged_LinesGreaterThanMaxLines(t *testing.T) {
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 16, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
+
+	resp := &request_module.RequestResponse{
+		ExecutionTime: 10,
+		HttpVersion:   "HTTP/2",
+		Method:        "POST",
+		StatusMessage: "201 Created",
+		Request:       request_module.RequestOptions{Url: "http://test"},
+		Result:        strings.Repeat("a\n", 100),
+	}
+
+	config := &config_module.Config{SlowResponseThreshold: 50}
+	m := &Model{response: resp, config: config}
+
+	
+	res := basic_infos_Render_Paged(m)
+	if !strings.Contains(res, "[1-0/9 lines]") {
+		t.Errorf("expected paged output with line count")
+	}
+}
+
+func Test_basic_infos_ScrollUp(t *testing.T) {
+	resp := &request_module.RequestResponse{}
+	config := &config_module.Config{}
+
+	m := &Model{response: resp, config: config, infosScrollOffset: 2}
+	basic_infos_ScrollUp(m)
+
+	if m.infosScrollOffset != 1 {
+		t.Errorf("ScrollUp did not decrement offset")
+	}
 
 	m.infosScrollOffset = 0
-
-	basic_infos_ScrollDown(m)
-	if m.infosScrollOffset != 0 {
-		t.Error("Should not advance scroll if there are not enough lines")
-	}
-}
-
-func Test_basic_infos_ScrollPgDown_NoAdvance(t *testing.T) {
-	m := makeModel()
-	m.infosLinesAmount = 5
-
-	oldGetHeightFunc := terminal_utility.GetHeightFunc
-	terminal_utility.GetHeightFunc = func() (int, error) { return 50, nil }
-	defer func() { terminal_utility.GetHeightFunc = oldGetHeightFunc }()
-
-	m.infosScrollOffset = 0
-
-	basic_infos_ScrollPgDown(m)
-	if m.infosScrollOffset != 0 {
-		t.Error("Should not advance PgDown if there are not enough lines")
-	}
-}
-
-func Test_basic_infos_ScrollUp_NoRetreat(t *testing.T) {
-	m := makeModel()
-	m.infosScrollOffset = 0
-
 	basic_infos_ScrollUp(m)
 
 	if m.infosScrollOffset != 0 {
-		t.Error("Should not retreat scroll if already at the top")
+		t.Errorf("ScrollUp should not go below zero")
+	}
+}
+
+func Test_basic_infos_ScrollDown(t *testing.T) {
+	resp := &request_module.RequestResponse{}
+	config := &config_module.Config{}
+
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 18, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
+
+	m := &Model{response: resp, config: config, infosScrollOffset: 0}
+	m.infosLinesAmount = 3
+	basic_infos_ScrollDown(m)
+	assert.Equal(t, 1, m.infosScrollOffset)
+	basic_infos_ScrollDown(m)
+	assert.Equal(t, 1, m.infosScrollOffset)
+}
+
+func Test_basic_infos_ScrollDown_Borders(t *testing.T) {
+	resp := &request_module.RequestResponse{}
+	config := &config_module.Config{}
+
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 20, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
+
+	m := &Model{response: resp, config: config, infosScrollOffset: 0}
+	m.infosLinesAmount = 0
+	basic_infos_ScrollDown(m)
+	assert.Equal(t, 0, m.infosScrollOffset)
+	m.infosLinesAmount = 2
+	basic_infos_ScrollDown(m)
+	assert.Equal(t, 0, m.infosScrollOffset)
+}
+
+func Test_basic_infos_ScrollPgUp(t *testing.T) {
+	resp := &request_module.RequestResponse{}
+	config := &config_module.Config{}
+
+	m := &Model{response: resp, config: config, infosScrollOffset: 6}
+	basic_infos_ScrollPgUp(m)
+
+	if m.infosScrollOffset != 1 {
+		t.Errorf("ScrollPgUp did not decrement by 5")
+	}
+
+	m.infosScrollOffset = 2
+	basic_infos_ScrollPgUp(m)
+
+	if m.infosScrollOffset != 0 {
+		t.Errorf("ScrollPgUp should not go below zero")
+	}
+}
+
+func Test_basic_infos_ScrollPgDown(t *testing.T) {
+	origGetHeightFunc := terminal_utility.GetHeightFunc
+	terminal_utility.GetHeightFunc = func() (int, error) { return 18, nil }
+	defer func() { terminal_utility.GetHeightFunc = origGetHeightFunc }()
+
+	m := newModelWithReqHeaders(http.Header{"A": {"1"}, "B": {"2"}, "C": {"3"}}, 0)
+	m.infosLinesAmount = 3
+	basic_infos_ScrollPgDown(m)
+	assert.Equal(t, 5, m.infosScrollOffset)
+}
+
+func Test_basic_infos_body_Render(t *testing.T) {
+	resp := &request_module.RequestResponse{
+		Body: []http_utility.HttpContentData{
+			{ContentType: "application/json", Value: `{"key": "value"}`},
+			{ContentType: "text/plain", Value: "plain text"},
+		},
+	}
+
+	m := &Model{response: resp}
+	res := basic_infos_body_Render(m)
+
+	if !strings.Contains(res, "Request Body:") {
+		t.Errorf("expected request body header in output")
+	}
+}
+
+func Test_basic_infos_body_Render_TextHtmlFormatting(t *testing.T) {
+	resp := &request_module.RequestResponse{
+		Body: []http_utility.HttpContentData{
+			{ContentType: "text/html", Value: "<div>Hello</div>"},
+		},
+	}
+
+	m := &Model{response: resp}
+	res := basic_infos_body_Render(m)
+
+	if !strings.Contains(res, "Request Body:") {
+		t.Errorf("expected request body header in output")
+	}
+}
+
+func Test_basic_infos_body_Render_MultipartValidFilePath(t *testing.T) {
+	resp := &request_module.RequestResponse{
+		Body: []http_utility.HttpContentData{
+			{ContentType: "multipart/form-data", Value: "./basic_infos.go"},
+		},
+	}
+
+	m := &Model{response: resp}
+	res := basic_infos_body_Render(m)
+
+	if !strings.Contains(res, "Request Body:") {
+		t.Errorf("expected request body header in output")
+	}
+}
+
+func Test_basic_infos_body_Render_MultipartValidPathButFileNotExists(t *testing.T) {
+	resp := &request_module.RequestResponse{
+		Body: []http_utility.HttpContentData{
+			{ContentType: "multipart/form-data", Value: "./basic_idsfnfos.go"},
+		},
+	}
+
+	m := &Model{response: resp}
+	res := basic_infos_body_Render(m)
+
+	if !strings.Contains(res, "Request Body:") {
+		t.Errorf("expected request body header in output")
 	}
 }

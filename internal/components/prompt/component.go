@@ -13,6 +13,8 @@ import (
 	"github.com/diogopereiradev/httpzen/internal/utils/theme"
 )
 
+var New = NewComponent
+
 type PromptImpl struct {
 	Title                 string
 	IncorrectTitleMessage string
@@ -30,7 +32,7 @@ type PromptEvents struct {
 	OnSubmitError func()
 }
 
-func New(options PromptImpl) {
+func NewComponent(options PromptImpl) {
 	input := textinput.New()
 	input.CharLimit = options.MaxLength
 	input.Focus()
