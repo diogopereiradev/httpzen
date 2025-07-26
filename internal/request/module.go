@@ -1,221 +1,141 @@
 package request_module
 
 import (
-	"encoding/json"
-	"fmt"
-	"net"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
-	ip_cache_module "github.com/diogopereiradev/httpzen/internal/cache"
 	config_module "github.com/diogopereiradev/httpzen/internal/config"
 	logger_module "github.com/diogopereiradev/httpzen/internal/logger"
+	"github.com/diogopereiradev/httpzen/internal/utils/http_utility"
+	"github.com/diogopereiradev/httpzen/internal/utils/ip_utility"
 	"github.com/go-resty/resty/v2"
 )
 
-type IpInfo struct {
-	Type      string  `json:"type"`
-	Ip        string  `json:"ip"`
-	Decimal   string  `json:"decimal,omitempty"`
-	Hostname  string  `json:"hostname,omitempty"`
-	ASN       string  `json:"asn,omitempty"`
-	ISP       string  `json:"isp,omitempty"`
-	State     string  `json:"state,omitempty"`
-	City      string  `json:"city,omitempty"`
-	Latitude  float64 `json:"latitude,omitempty"`
-	Longitude float64 `json:"longitude,omitempty"`
-}
-
 type RequestOptions struct {
-	Timeout      time.Duration     `json:"timeout"`
-	Headers      map[string]string `json:"headers"`
-	Body         string            `json:"body"`
-	Cookies      map[string]string `json:"cookies"`
-	Url          string            `json:"url"`
-	Method       string            `json:"method"`
-	SlowResponse bool              `json:"slow_response"`
-}
-
-type RequestResponse struct {
-	StatusCode    int            `json:"status_code"`
-	ExecutionTime string         `json:"execution_time"`
-	Headers       http.Header    `json:"headers"`
-	Body          string         `json:"body"`
-	Cookies       []*http.Cookie `json:"cookies"`
-	Path          string         `json:"path"`
-	Host          string         `json:"host"`
-	Method        string         `json:"method"`
-	IpInfos       []IpInfo       `json:"ip_infos"`
-	SlowResponse  bool           `json:"slow_response"`
-	Result        string         `json:"result"`
+	Timeout time.Duration                  `json:"timeout"`
+	Headers http.Header                    `json:"headers"`
+	Body    []http_utility.HttpContentData `json:"body"`
+	Url     string                         `json:"url"`
+	Method  string                         `json:"method"`
 }
 
 var Exit = os.Exit
 
-var fetchIpInfoFunc = fetchIpInfo
+var restyNew = resty.New
+var parseHttpMethod = http_utility.ParseHttpMethod
+var parseUrl = http_utility.ParseUrl
+var parseExecutionTimeInMilliseconds = http_utility.ParseExecutionTimeInMilliseconds
+var getConfig = config_module.GetConfig
+var lookupDomainIps = ip_utility.LookupDomainIps
+var loggerError = logger_module.Error
+var parseApplicationJson = http_utility.ParseApplicationJson
+var parseMultipartFormData = http_utility.ParseMultipartFormData
+var parseUrlEncodedForm = http_utility.ParseUrlEncodedForm
 
-func HandleRequest(options RequestOptions) RequestResponse {
-	method := handleHttpMethod(options.Method)
-	url := handleUrl(options.Url)
+type RequestResponse struct {
+	HttpVersion   string                         `json:"http_version"`
+	StatusMessage string                         `json:"status_message"`
+	StatusCode    int                            `json:"status_code"`
+	ExecutionTime float64                        `json:"execution_time"`
+	Headers       http.Header                    `json:"headers"`
+	Body          []http_utility.HttpContentData `json:"body"`
+	Cookies       []*http.Cookie                 `json:"cookies"`
+	Request       RequestOptions                 `json:"request"`
+	Path          string                         `json:"path"`
+	Host          string                         `json:"host"`
+	Method        string                         `json:"method"`
+	IpInfos       []ip_utility.LookupIpInfo      `json:"ip_infos"`
+	SlowResponse  bool                           `json:"slow_response"`
+	Result        string                         `json:"result"`
+}
 
-	client := resty.New()
+func RunRequest(options RequestOptions) RequestResponse {
+	method := parseHttpMethod(options.Method)
+	url := parseUrl(options.Url)
+	if url == "" {
+		loggerError("Invalid URL. Please provide a valid URL (http:// or https://).")
+		Exit(1)
+		return RequestResponse{}
+	}
+
+	client := restyNew()
 	client.SetTimeout(options.Timeout)
 
 	req := client.R()
-	req.SetHeaders(options.Headers)
-	req.SetBody(options.Body)
+	headers := make(map[string]string)
+	for k, v := range options.Headers {
+		if len(v) > 0 {
+			headers[k] = v[0]
+		}
+	}
 
-	var cookies []*http.Cookie
-	for k, v := range options.Cookies {
-		cookies = append(cookies, &http.Cookie{Name: k, Value: v})
+	reqBody := HandleBody(options.Body)
+	if reqBody.ContentTypeHeader != "" {
+		headers["Content-Type"] = reqBody.ContentTypeHeader
+		options.Headers.Set("Content-Type", reqBody.ContentTypeHeader)
 	}
-	if len(cookies) > 0 {
-		req.SetCookies(cookies)
-	}
+
+	req.SetHeaders(headers)
+	req.SetBody(reqBody.Result)
 
 	startTime := time.Now()
 
 	res, err := req.Execute(method, url)
 	if err != nil {
-		logger_module.Error("Failed to execute HTTP request: " + err.Error())
+		loggerError("Failed to execute HTTP request: " + err.Error())
 		Exit(1)
+		return RequestResponse{}
 	}
 
-	executionTime := handleExecutionTimeInMilliseconds(startTime)
-	config := config_module.GetConfig()
+	executionTime := parseExecutionTimeInMilliseconds(startTime)
+	config := getConfig()
 
 	return RequestResponse{
+		HttpVersion:   res.RawResponse.Proto,
 		Result:        res.String(),
+		StatusMessage: res.Status(),
 		StatusCode:    res.StatusCode(),
-		ExecutionTime: fmt.Sprintf("%.2f", executionTime),
+		ExecutionTime: executionTime,
 		Headers:       res.Header(),
 		Body:          options.Body,
 		Cookies:       res.Cookies(),
 		Path:          res.Request.RawRequest.URL.Path,
 		Host:          res.Request.RawRequest.URL.Host,
 		Method:        res.Request.Method,
-		IpInfos:       handleDomainIpsLookup(res),
+		IpInfos:       lookupDomainIps(res),
 		SlowResponse:  executionTime > float64(config.SlowResponseThreshold),
+		Request: RequestOptions{
+			Url:     url,
+			Headers: options.Headers,
+			Method:  method,
+			Timeout: options.Timeout,
+			Body:    options.Body,
+		},
 	}
 }
 
-func handleHttpMethod(method string) string {
-	switch method {
-	case "Get", "Post", "Put", "Delete", "Patch", "Head":
-		return method
-	default:
-		return "GET"
-	}
-}
-
-func handleUrl(url string) string {
-	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-		logger_module.Error("Please enter a valid URL: " + url)
-		Exit(1)
-	}
-	return url
-}
-
-func handleExecutionTimeInMilliseconds(start time.Time) float64 {
-	executionTime := time.Since(start)
-	ms := float64(executionTime.Nanoseconds()) / 1e6
-	return ms
-}
-
-func handleDomainIpsLookup(res *resty.Response) []IpInfo {
-	host := res.Request.RawRequest.URL.Host
-	if strings.Contains(host, ":") {
-		host = strings.Split(host, ":")[0]
-	}
-	ips, err := net.LookupIP(host)
-	if err != nil {
-		return []IpInfo{}
+func HandleBody(body []http_utility.HttpContentData) http_utility.HandleParseResult {
+	if len(body) == 0 {
+		return http_utility.HandleParseResult{}
 	}
 
-	var ipList []IpInfo
-	for _, ip := range ips {
-		ipType := ""
-		if ip.To4() != nil {
-			ipType = "IPv4"
-		} else {
-			ipType = "IPv6"
-		}
+	contentType := body[0].ContentType
 
-		ipInfo, err := fetchIpInfoFunc(ipType, ip.String())
-		if err != nil {
-			continue
-		}
-
-		ipList = append(ipList, ipInfo)
-	}
-	return ipList
-}
-
-func fetchIpInfo(ipType string, ip string) (IpInfo, error) {
-	key := strings.ReplaceAll(ip, ".", "_")
-	if cached, ok := ip_cache_module.GetIpInfoFromCache(key); ok {
-		var info IpInfo
-		b, _ := json.Marshal(cached)
-		_ = json.Unmarshal(b, &info)
-		return info, nil
+	if contentType == "application/json" {
+		return parseApplicationJson(body[0])
 	}
 
-	apiUrl := fmt.Sprintf("https://ipinfo.io/%s/json", ip)
-	client := resty.New()
-	res, _ := client.R().Get(apiUrl)
-
-	type ipinfoResponse struct {
-		Hostname string `json:"hostname"`
-		Postal   string `json:"postal"`
-		Org      string `json:"org"`
-		City     string `json:"city"`
-		Region   string `json:"region"`
-		Country  string `json:"country"`
-		Loc      string `json:"loc"`
-		ASN      string `json:"asn"`
-		ISP      string `json:"isp"`
+	if contentType == "multipart/form-data" {
+		return parseMultipartFormData(body)
 	}
 
-	var resp ipinfoResponse
-	json.Unmarshal(res.Body(), &resp)
-
-	latitude := 0.0
-	longitude := 0.0
-
-	if resp.Loc != "" {
-		parts := strings.Split(resp.Loc, ",")
-		if len(parts) == 2 {
-			fmt.Sscanf(parts[0], "%f", &latitude)
-			fmt.Sscanf(parts[1], "%f", &longitude)
-		}
+	if contentType == "application/x-www-form-urlencoded" {
+		return parseUrlEncodedForm(body)
 	}
 
-	info := IpInfo{
-		Type:      ipType,
-		Ip:        ip,
-		Decimal:   resp.Postal,
-		Hostname:  resp.Hostname,
-		ASN:       resp.Org,
-		ISP:       resp.Org,
-		City:      resp.City,
-		State:     resp.Region,
-		Latitude:  latitude,
-		Longitude: longitude,
+	return http_utility.HandleParseResult{
+		ContentTypeHeader: contentType,
+		Result:            body[0].Value,
 	}
-
-	ip_cache_module.SetIpInfoToCache(key, map[string]any{
-		"Type":      info.Type,
-		"Ip":        info.Ip,
-		"Decimal":   info.Decimal,
-		"Hostname":  info.Hostname,
-		"ASN":       info.ASN,
-		"ISP":       info.ISP,
-		"City":      info.City,
-		"State":     info.State,
-		"Latitude":  info.Latitude,
-		"Longitude": info.Longitude,
-	})
-	return info, nil
 }

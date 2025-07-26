@@ -1,146 +1,170 @@
 package request_module
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
-	"net/url"
 	"os"
+	"reflect"
 	"testing"
 	"time"
 
-	ip_cache_module "github.com/diogopereiradev/httpzen/internal/cache"
+	config_module "github.com/diogopereiradev/httpzen/internal/config"
+	"github.com/diogopereiradev/httpzen/internal/utils/http_utility"
+	ip_utility "github.com/diogopereiradev/httpzen/internal/utils/ip_utility"
 	"github.com/go-resty/resty/v2"
 )
 
-func Test_handleHttpMethod(t *testing.T) {
-	cases := []struct {
-		input    string
-		expected string
-	}{
-		{"Get", "Get"},
-		{"Post", "Post"},
-		{"Put", "Put"},
-		{"Delete", "Delete"},
-		{"Patch", "Patch"},
-		{"Head", "Head"},
-		{"Unknown", "GET"},
-		{"", "GET"},
-	}
-	for _, c := range cases {
-		if got := handleHttpMethod(c.input); got != c.expected {
-			t.Errorf("handleHttpMethod(%q) = %q, want %q", c.input, got, c.expected)
-		}
-	}
-}
-
-// URL Handling Tests
-func Test_handleUrl_valid(t *testing.T) {
-	url := "https://example.com"
-	got := handleUrl(url)
-	if got != url {
-		t.Errorf("handleUrl(%q) = %q, want %q", url, got, url)
-	}
-}
-
-func Test_handleUrl_invalid(t *testing.T) {
+func TestRunRequest_InvalidURL(t *testing.T) {
 	called := false
 	Exit = func(code int) { called = true }
-	defer func() { Exit = os.Exit }()
-	_ = handleUrl("ftp://example.com")
+	loggerError = func(msg string) {}
+	defer func() { Exit = os.Exit; loggerError = nil }()
+
+	options := RequestOptions{
+		Url:    "invalid-url",
+		Method: "GET",
+	}
+
+	resp := RunRequest(options)
 	if !called {
-		t.Error("handleUrl should call Exit for invalid URL")
+		t.Errorf("Exit should be called on invalid URL")
+	}
+
+	if !reflect.DeepEqual(resp, RequestResponse{}) {
+		t.Errorf("Expected empty response on invalid URL")
 	}
 }
 
-// Execution Time Tests
-func Test_handleExecutionTimeInMilliseconds(t *testing.T) {
-	start := time.Now().Add(-1500 * time.Millisecond)
-	ms := handleExecutionTimeInMilliseconds(start)
-	if ms < 1400 || ms > 1600 {
-		t.Errorf("handleExecutionTimeInMilliseconds returned %f, want ~1500", ms)
+func TestRunRequest_RequestError(t *testing.T) {
+	Exit = func(code int) {}
+	loggerError = func(msg string) {}
+	restyNew = func() *resty.Client {
+		c := resty.New()
+		c.OnBeforeRequest(func(_ *resty.Client, req *resty.Request) error {
+			return errors.New("fail")
+		})
+		return c
+	}
+	defer func() { Exit = os.Exit; loggerError = nil; restyNew = resty.New }()
+
+	options := RequestOptions{
+		Url:    "http://localhost",
+		Method: "GET",
+	}
+
+	resp := RunRequest(options)
+	if !reflect.DeepEqual(resp, RequestResponse{}) {
+		t.Errorf("Expected empty response on request error")
 	}
 }
 
-// Domain IPs Lookup Tests
-func Test_handleDomainIpsLookup_empty(t *testing.T) {
-	res := &resty.Response{}
-	res.Request = &resty.Request{RawRequest: &http.Request{URL: &url.URL{Host: "invalidhost"}}}
-	ips := handleDomainIpsLookup(res)
-	if len(ips) != 0 {
-		t.Errorf("handleDomainIpsLookup should return empty slice for invalid host")
-	}
-}
-
-func Test_handleDomainIpsLookup_with_port(t *testing.T) {
-	res := &resty.Response{}
-	res.Request = &resty.Request{RawRequest: &http.Request{URL: &url.URL{Host: "localhost:8080"}}}
-	_ = handleDomainIpsLookup(res)
-}
-
-func Test_handleDomainIpsLookup_fetchIpInfo_error(t *testing.T) {
-	res := &resty.Response{}
-	res.Request = &resty.Request{RawRequest: &http.Request{URL: &url.URL{Host: "localhost"}}}
-
-	original := fetchIpInfoFunc
-	fetchIpInfoFunc = func(ipType, ip string) (IpInfo, error) {
-		return IpInfo{}, fmt.Errorf("mock error")
-	}
-	defer func() { fetchIpInfoFunc = original }()
-
-	ips := handleDomainIpsLookup(res)
-	if len(ips) != 0 {
-		t.Errorf("handleDomainIpsLookup should return empty slice when fetchIpInfo returns error, got: %v", ips)
-	}
-}
-
-// fetchIpInfo Tests
-func Test_fetchIpInfo_cache(t *testing.T) {
-	key := "127_0_0_1"
-
-	ip_cache_module.SetIpInfoToCache(key, map[string]any{"Type": "IPv4", "Ip": "127.0.0.1"})
-
-	info, err := fetchIpInfo("IPv4", "127.0.0.1")
-	if err != nil {
-		t.Errorf("fetchIpInfo returned error: %v", err)
+func TestRunRequest_Success(t *testing.T) {
+	Exit = func(code int) {}
+	loggerError = func(msg string) {}
+	getConfig = func() config_module.Config {
+		return config_module.Config{SlowResponseThreshold: 1000}
 	}
 
-	if info.Ip != "127.0.0.1" {
-		t.Errorf("fetchIpInfo returned wrong Ip: %v", info.Ip)
+	lookupDomainIps = func(_ *resty.Response) []ip_utility.LookupIpInfo {
+		return []ip_utility.LookupIpInfo{{Ip: "127.0.0.1"}}
 	}
-}
 
-// HandleRequest Tests
-func Test_HandleRequest_invalid_url(t *testing.T) {
-	called := false
-	Exit = func(code int) { called = true }
-	defer func() { Exit = os.Exit }()
+	defer func() {
+		Exit = os.Exit
+		loggerError = nil
+		getConfig = config_module.GetConfig
+		lookupDomainIps = ip_utility.LookupDomainIps
+		restyNew = resty.New
+	}()
 
-	opts := RequestOptions{Url: "invalid", Method: "Get"}
-	_ = HandleRequest(opts)
-	if !called {
-		t.Error("HandleRequest should call Exit for invalid URL")
-	}
-}
-
-func Test_HandleRequest_valid(t *testing.T) {
-	opts := RequestOptions{
-		Timeout: 2 * time.Second,
-		Headers: map[string]string{"Accept": "application/json"},
-		Cookies: map[string]string{"testcookie": "testvalue"},
+	options := RequestOptions{
 		Url:     "https://google.com",
 		Method:  "GET",
+		Timeout: 1 * time.Second,
+		Headers: http.Header{"X-Test": {"1"}},
+		Body:    []http_utility.HttpContentData{{ContentType: "text/plain", Value: "test body"}},
 	}
 
-	resp := HandleRequest(opts)
-	if resp.StatusCode != 200 && resp.StatusCode != 400 {
-		t.Errorf("HandleRequest returned wrong status code: %v", resp.StatusCode)
+	resp := RunRequest(options)
+	if resp.Request.Url != "https://google.com" {
+		t.Errorf("Expected url to be set")
 	}
 
 	if resp.Method != "GET" {
-		t.Errorf("HandleRequest returned wrong method: %v", resp.Method)
+		t.Errorf("Expected method to be GET")
 	}
 
-	if resp.Host == "" {
-		t.Errorf("HandleRequest returned empty host")
+	if len(resp.IpInfos) == 0 {
+		t.Errorf("Expected IpInfos to be filled")
+	} else if resp.IpInfos[0].Ip != "127.0.0.1" {
+		t.Errorf("Expected fake IP info")
+	}
+}
+
+func TestHandleBody_Empty(t *testing.T) {
+	res := HandleBody([]http_utility.HttpContentData{})
+	if !reflect.DeepEqual(res, http_utility.HandleParseResult{}) {
+		t.Errorf("Expected empty result for empty body")
+	}
+}
+
+func TestHandleBody_Json(t *testing.T) {
+	called := false
+	parseApplicationJson = func(data http_utility.HttpContentData) http_utility.HandleParseResult {
+		called = true
+		return http_utility.HandleParseResult{ContentTypeHeader: "application/json", Result: "{}"}
+	}
+	defer func() { parseApplicationJson = http_utility.ParseApplicationJson }()
+
+	res := HandleBody([]http_utility.HttpContentData{{ContentType: "application/json", Value: "{}"}})
+	if !called {
+		t.Errorf("ParseApplicationJson should be called")
+	}
+	
+	if res.ContentTypeHeader != "application/json" {
+		t.Errorf("Expected application/json header")
+	}
+}
+
+func TestHandleBody_Multipart(t *testing.T) {
+	called := false
+	parseMultipartFormData = func(data []http_utility.HttpContentData) http_utility.HandleParseResult {
+		called = true
+		return http_utility.HandleParseResult{ContentTypeHeader: "multipart/form-data", Result: "data"}
+	}
+	defer func() { parseMultipartFormData = http_utility.ParseMultipartFormData }()
+
+	res := HandleBody([]http_utility.HttpContentData{{ContentType: "multipart/form-data"}})
+	if !called {
+		t.Errorf("ParseMultipartFormData should be called")
+	}
+
+	if res.ContentTypeHeader != "multipart/form-data" {
+		t.Errorf("Expected multipart/form-data header")
+	}
+}
+
+func TestHandleBody_UrlEncoded(t *testing.T) {
+	called := false
+	parseUrlEncodedForm = func(data []http_utility.HttpContentData) http_utility.HandleParseResult {
+		called = true
+		return http_utility.HandleParseResult{ContentTypeHeader: "application/x-www-form-urlencoded", Result: "foo=bar"}
+	}
+	defer func() { parseUrlEncodedForm = http_utility.ParseUrlEncodedForm }()
+
+	res := HandleBody([]http_utility.HttpContentData{{ContentType: "application/x-www-form-urlencoded"}})
+	if !called {
+		t.Errorf("ParseUrlEncodedForm should be called")
+	}
+	
+	if res.ContentTypeHeader != "application/x-www-form-urlencoded" {
+		t.Errorf("Expected application/x-www-form-urlencoded header")
+	}
+}
+
+func TestHandleBody_Other(t *testing.T) {
+	res := HandleBody([]http_utility.HttpContentData{{ContentType: "text/plain", Value: "abc"}})
+	if res.ContentTypeHeader != "text/plain" || res.Result != "abc" {
+		t.Errorf("Expected passthrough for unknown content type")
 	}
 }
