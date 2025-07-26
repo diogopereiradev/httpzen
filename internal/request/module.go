@@ -54,7 +54,7 @@ func RunRequest(options RequestOptions) RequestResponse {
 	method := parseHttpMethod(options.Method)
 	url := parseUrl(options.Url)
 	if url == "" {
-		loggerError("Invalid URL. Please provide a valid URL (http:// or https://).")
+		loggerError("Invalid URL. Please provide a valid URL (http:// or https://).", 70)
 		Exit(1)
 		return RequestResponse{}
 	}
@@ -83,7 +83,7 @@ func RunRequest(options RequestOptions) RequestResponse {
 
 	res, err := req.Execute(method, url)
 	if err != nil {
-		loggerError("Failed to execute HTTP request: " + err.Error())
+		loggerError("Failed to execute HTTP request: " + err.Error(), 70)
 		Exit(1)
 		return RequestResponse{}
 	}

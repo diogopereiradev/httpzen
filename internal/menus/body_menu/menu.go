@@ -34,7 +34,7 @@ func New(req *request_module.RequestOptions, bodyPointer *[]http_utility.HttpCon
 				if choice >= 0 && choice < len(choices) {
 					contentType = choices[choice]
 				} else {
-					ErrorLogger("Invalid Content-Type selected.")
+					ErrorLogger("Invalid Content-Type selected.", 50)
 					Exit(1)
 				}
 			},
@@ -53,7 +53,7 @@ func New(req *request_module.RequestOptions, bodyPointer *[]http_utility.HttpCon
 	case "multipart/form-data":
 		bodyResult = multipartFormDataMenu()
 	default:
-		ErrorLogger("Invalid Content-Type selected.")
+		ErrorLogger("Invalid Content-Type selected.", 50)
 		Exit(1)
 	}
 
@@ -68,7 +68,7 @@ func applicationJsonMenu() []http_utility.HttpContentData {
 		Events: textarea_component.TextareaEvents{
 			OnSubmit: func(value string) {
 				if value == "" {
-					ErrorLogger("JSON body cannot be empty.")
+					ErrorLogger("JSON body cannot be empty.", 50)
 					Exit(1)
 					return
 				}
@@ -90,7 +90,7 @@ func plainText() []http_utility.HttpContentData {
 		Events: textarea_component.TextareaEvents{
 			OnSubmit: func(value string) {
 				if value == "" {
-					ErrorLogger("Plain text body cannot be empty.")
+					ErrorLogger("Plain text body cannot be empty.", 50)
 					Exit(1)
 					return
 				}

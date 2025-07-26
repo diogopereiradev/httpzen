@@ -17,7 +17,7 @@ import (
 func TestRunRequest_InvalidURL(t *testing.T) {
 	called := false
 	Exit = func(code int) { called = true }
-	loggerError = func(msg string) {}
+	loggerError = func(msg string, maxWidth int) {}
 	defer func() { Exit = os.Exit; loggerError = nil }()
 
 	options := RequestOptions{
@@ -37,7 +37,7 @@ func TestRunRequest_InvalidURL(t *testing.T) {
 
 func TestRunRequest_RequestError(t *testing.T) {
 	Exit = func(code int) {}
-	loggerError = func(msg string) {}
+	loggerError = func(msg string, maxWidth int) {}
 	restyNew = func() *resty.Client {
 		c := resty.New()
 		c.OnBeforeRequest(func(_ *resty.Client, req *resty.Request) error {
@@ -60,7 +60,7 @@ func TestRunRequest_RequestError(t *testing.T) {
 
 func TestRunRequest_Success(t *testing.T) {
 	Exit = func(code int) {}
-	loggerError = func(msg string) {}
+	loggerError = func(msg string, maxWidth int) {}
 	getConfig = func() config_module.Config {
 		return config_module.Config{SlowResponseThreshold: 1000}
 	}

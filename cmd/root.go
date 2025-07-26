@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	clean_cache_command "github.com/diogopereiradev/httpzen/cmd/commands/clean-cache"
 	help_command "github.com/diogopereiradev/httpzen/cmd/commands/help"
 	request_command "github.com/diogopereiradev/httpzen/cmd/commands/request"
 	version_command "github.com/diogopereiradev/httpzen/cmd/commands/version"
@@ -20,7 +21,7 @@ func setFlagErrorFunc(cmd *cobra.Command) {
 	cmd.SetFlagErrorFunc(func(c *cobra.Command, err error) error {
 		rootCmd.Help()
 		if err != nil {
-			logger_module.Error(err.Error())
+			logger_module.Error(err.Error(), 50)
 		}
 		return nil
 	})
@@ -33,6 +34,7 @@ func init() {
 	help_command.Init(rootCmd)
 	version_command.Init(rootCmd)
 	request_command.Init(rootCmd)
+	clean_cache_command.Init(rootCmd)
 
 	setFlagErrorFunc(rootCmd)
 }

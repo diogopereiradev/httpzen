@@ -26,7 +26,7 @@ func mockExit(code int) {
 	panic("exit")
 }
 
-func mockLoggerError(msg string) {
+func mockLoggerError(msg string, maxWidth int) {
 	mockLoggerMsg = msg
 }
 
@@ -83,7 +83,7 @@ func TestNew_ErrorOnRun(t *testing.T) {
 		}
 	}()
 
-	LoggerError("Error on rendering the program: fail")
+	LoggerError("Error on rendering the program: fail", 70)
 	Exit(1)
 }
 

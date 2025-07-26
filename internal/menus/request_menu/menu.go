@@ -71,7 +71,7 @@ func New(res *request_module.RequestResponse) {
 	TermClear()
 
 	if _, err := RunProgram(p); err != nil {
-		LoggerError("Error on rendering the program: " + err.Error())
+		LoggerError("Error on rendering the program: " + err.Error(), 70)
 		Exit(1)
 	}
 }
