@@ -158,3 +158,13 @@ func TestUpdateConfigPanicOnWriteConfigAs(t *testing.T) {
 	}
 	UpdateConfig(config)
 }
+
+func TestGetConfigFilePath(t *testing.T) {
+	CONFIG_NAME = "httpzen_test"
+
+	configPath := app_path_util.GetConfigPath()
+	expectedConfigFile := configPath + "/" + CONFIG_NAME + "." + CONFIG_EXTENSION
+
+	configFile := GetConfigFilePath()
+	assert.Equal(t, expectedConfigFile, configFile, "should return correct config file path")
+}

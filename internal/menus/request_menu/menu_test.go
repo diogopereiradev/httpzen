@@ -163,7 +163,7 @@ func TestModel_View(t *testing.T) {
 		response: &request_module.RequestResponse{
 			Request: request_module.RequestOptions{},
 		},
-		clipboardTimedMessage: timed_message_component.NewTimedMessage(),
+		clipboardTimedMessage: timed_message_component.New(),
 	}
 	m.activeTab = tab_Result
 	m.isRefetching = true
@@ -212,7 +212,7 @@ func TestModel_View_AllTabs(t *testing.T) {
 
 	assert.NotContains(t, m.View(), ".request")
 
-	m.clipboardTimedMessage = timed_message_component.NewTimedMessage()
+	m.clipboardTimedMessage = timed_message_component.New()
 	m.clipboardTimedMessage.Show("copied", 1)
 	_ = m.View()
 }
@@ -251,7 +251,7 @@ func TestModel_Update_Copy(t *testing.T) {
 	m := &Model{
 		config:                &config_module.Config{},
 		response:              &request_module.RequestResponse{Result: "copied"},
-		clipboardTimedMessage: timed_message_component.NewTimedMessage(),
+		clipboardTimedMessage: timed_message_component.New(),
 	}
 	msg := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'c'}}
 

@@ -4,6 +4,7 @@ import (
 	"os"
 
 	clean_cache_command "github.com/diogopereiradev/httpzen/cmd/commands/clean-cache"
+	config_command "github.com/diogopereiradev/httpzen/cmd/commands/config"
 	help_command "github.com/diogopereiradev/httpzen/cmd/commands/help"
 	request_command "github.com/diogopereiradev/httpzen/cmd/commands/request"
 	version_command "github.com/diogopereiradev/httpzen/cmd/commands/version"
@@ -35,6 +36,7 @@ func init() {
 	version_command.Init(rootCmd)
 	request_command.Init(rootCmd)
 	clean_cache_command.Init(rootCmd)
+	config_command.Init(rootCmd)
 
 	setFlagErrorFunc(rootCmd)
 }

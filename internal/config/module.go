@@ -77,3 +77,8 @@ func InitConfig() Config {
 	}
 	return config
 }
+
+func GetConfigFilePath() string {
+	configPath := app_path_util.GetConfigPath()
+	return configPath + "/" + CONFIG_NAME + "." + CONFIG_EXTENSION
+}
