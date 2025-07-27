@@ -16,7 +16,7 @@ type TimedMessage struct {
 
 type TimedMessageExpiredMsg struct{}
 
-func NewTimedMessage() *TimedMessage {
+func New() *TimedMessage {
 	return &TimedMessage{}
 }
 
@@ -40,8 +40,7 @@ func (d *TimedMessage) Render() string {
 		Foreground(theme.LightText).
 		Background(theme.Success).
 		Padding(0, 2).
-		Bold(true).
-		Margin(1, 0)
+		Bold(true)
 
 	return style.Render(d.Message)
 }

@@ -59,7 +59,7 @@ func initialModel(res *request_module.RequestResponse, config *config_module.Con
 		activeTab:             tab_Result,
 		response:              res,
 		isRefetching:          false,
-		clipboardTimedMessage: timed_message_component.NewTimedMessage(),
+		clipboardTimedMessage: timed_message_component.New(),
 	}
 }
 
@@ -112,7 +112,7 @@ func (m *Model) View() string {
 	if m.clipboardTimedMessage != nil && m.clipboardTimedMessage.Visible {
 		dialogMsg := m.clipboardTimedMessage.Render()
 		if dialogMsg != "" {
-			content += dialogMsg
+			content += "\n" + dialogMsg
 		}
 	}
 	return content
