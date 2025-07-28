@@ -23,6 +23,7 @@ jobs:
         run: make test
 
   build:
+    needs: tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
