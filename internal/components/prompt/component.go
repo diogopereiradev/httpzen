@@ -79,7 +79,7 @@ func (p PromptImpl) Init() tea.Cmd {
 
 func (p PromptImpl) View() string {
 	config := config_module.GetConfig()
-	
+
 	var output string
 
 	questionIcon := lipgloss.NewStyle().Foreground(theme.Warn).Render("?")

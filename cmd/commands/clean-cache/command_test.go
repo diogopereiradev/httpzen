@@ -48,7 +48,7 @@ func TestCleancache_Run(t *testing.T) {
 			break
 		}
 	}
-	
+
 	assert.NotNil(t, cleancacheCmd)
 	cleancacheCmd.Run(cleancacheCmd, []string{})
 	assert.True(t, cleared)

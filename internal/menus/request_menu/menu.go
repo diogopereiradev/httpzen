@@ -81,7 +81,7 @@ func New(res *request_module.RequestResponse) {
 		LoggerError("Error on rendering the program: "+err.Error(), 70)
 		Exit(1)
 	}
-	
+
 	if BenchmarkRequestToRun != nil {
 		StartBenchmark(*BenchmarkRequestToRun)
 		BenchmarkRequestToRun = nil

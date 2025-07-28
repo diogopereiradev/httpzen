@@ -95,9 +95,12 @@ func (m *BenchmarkModel) View() string {
 func (m *BenchmarkModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
 		switch keyMsg.Type {
-		case tea.KeyCtrlC: return m, tea.Quit
+		case tea.KeyCtrlC:
+			return m, tea.Quit
 		case tea.KeyRunes:
-			if keyMsg.String() == "q" { return m, tea.Quit }
+			if keyMsg.String() == "q" {
+				return m, tea.Quit
+			}
 		}
 	}
 

@@ -120,7 +120,7 @@ func TestHandleBody_Json(t *testing.T) {
 	if !called {
 		t.Errorf("ParseApplicationJson should be called")
 	}
-	
+
 	if res.ContentTypeHeader != "application/json" {
 		t.Errorf("Expected application/json header")
 	}
@@ -156,7 +156,7 @@ func TestHandleBody_UrlEncoded(t *testing.T) {
 	if !called {
 		t.Errorf("ParseUrlEncodedForm should be called")
 	}
-	
+
 	if res.ContentTypeHeader != "application/x-www-form-urlencoded" {
 		t.Errorf("Expected application/x-www-form-urlencoded header")
 	}

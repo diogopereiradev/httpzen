@@ -70,8 +70,12 @@ func basic_infos_ScrollUp(m *Model) {
 func basic_infos_ScrollDown(m *Model) {
 	maxLines := terminal_utility.GetTerminalHeight(9999) - 16
 
-	if m.infosLinesAmount == 0 { return }
-	if m.infosLinesAmount <= maxLines { return }
+	if m.infosLinesAmount == 0 {
+		return
+	}
+	if m.infosLinesAmount <= maxLines {
+		return
+	}
 
 	if m.infosScrollOffset+maxLines >= m.infosLinesAmount {
 		return
@@ -112,7 +116,7 @@ func basic_infos_body_Render(m *Model) string {
 
 	if len(m.response.Body) == 0 {
 		content += yellowFieldTextStyle.Render("No request body available.") + "\n"
-		return content;
+		return content
 	}
 
 	for i, body := range m.response.Body {
@@ -130,14 +134,14 @@ func basic_infos_body_Render(m *Model) string {
 		}
 
 		content += specialFieldTextStyle.Render("Content: ") + "\n\n"
-		
+
 		if body.Key != "" {
-			content += ansi.Wrap(greenFieldTextStyle.Render("Key: ") + body.Key, terminal_utility.GetTerminalWidth(9999), "") + "\n"
-			content += ansi.Wrap(greenFieldTextStyle.Render("Value: ") + body.Value, terminal_utility.GetTerminalWidth(9999), "")
+			content += ansi.Wrap(greenFieldTextStyle.Render("Key: ")+body.Key, terminal_utility.GetTerminalWidth(9999), "") + "\n"
+			content += ansi.Wrap(greenFieldTextStyle.Render("Value: ")+body.Value, terminal_utility.GetTerminalWidth(9999), "")
 		} else {
 			switch body.ContentType {
-		  case "application/json":
-			  content += ansi.Wrap(requestBodyStyle.Render(json_formatter.FormatJSON(body.Value)), terminal_utility.GetTerminalWidth(9999), "") + "\n"
+			case "application/json":
+				content += ansi.Wrap(requestBodyStyle.Render(json_formatter.FormatJSON(body.Value)), terminal_utility.GetTerminalWidth(9999), "") + "\n"
 			case "text/plain":
 				content += ansi.Wrap(requestBodyStyle.Render(body.Value), terminal_utility.GetTerminalWidth(9999), "") + "\n"
 			case "text/html":
@@ -147,9 +151,9 @@ func basic_infos_body_Render(m *Model) string {
 			}
 		}
 
-		if i >= len(m.response.Body) - 1 {
-  		content += "\n"
- 		}
+		if i >= len(m.response.Body)-1 {
+			content += "\n"
+		}
 	}
 	return content
 }

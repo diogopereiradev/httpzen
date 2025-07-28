@@ -32,7 +32,7 @@ func ParseApplicationJson(data HttpContentData) HandleParseResult {
 	var jsonData any
 
 	if err := json.Unmarshal([]byte(data.Value), &jsonData); err != nil {
-		logger_module.Error("Failed to parse JSON body: " + err.Error(), 70)
+		logger_module.Error("Failed to parse JSON body: "+err.Error(), 70)
 		return HandleParseResult{}
 	}
 	return HandleParseResult{ContentTypeHeader: data.ContentType, Result: jsonData}
@@ -157,7 +157,7 @@ func GetFileByPath(path string) (*FileInfoData, error) {
 	if err != nil || info.IsDir() {
 		return &FileInfoData{Name: "", PathIsValid: true}, os.ErrNotExist
 	}
-	
+
 	return &FileInfoData{
 		Name:        info.Name(),
 		PathIsValid: true,

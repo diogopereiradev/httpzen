@@ -8,17 +8,17 @@ import (
 )
 
 type Metrics struct {
-	ExecutedThreads       int32
-	TotalRequests         int
-	TotalErrors           int
-	TotalSuccess          int
-	TotalBytesSent        int
-	TotalBytesReceived    int
-	TotalDuration         int
-	Duration              int
-	RequestsMinLatency    float64
-	RequestsMaxLatency    float64
-	RequestsPerSecond     int
+	ExecutedThreads    int32
+	TotalRequests      int
+	TotalErrors        int
+	TotalSuccess       int
+	TotalBytesSent     int
+	TotalBytesReceived int
+	TotalDuration      int
+	Duration           int
+	RequestsMinLatency float64
+	RequestsMaxLatency float64
+	RequestsPerSecond  int
 }
 
 type BenchmarkOptions struct {
@@ -35,17 +35,17 @@ type BenchmarkResult struct {
 func initialResultModel() *BenchmarkResult {
 	return &BenchmarkResult{
 		Metrics: Metrics{
-			ExecutedThreads:       0,
-			TotalRequests:         0,
-			TotalErrors:           0,
-			TotalSuccess:          0,
-			TotalBytesSent:        0,
-			TotalBytesReceived:    0,
-			TotalDuration:         0,
-			Duration:              0,
-			RequestsMinLatency:    0,
-			RequestsMaxLatency:    0,
-			RequestsPerSecond:     0,
+			ExecutedThreads:    0,
+			TotalRequests:      0,
+			TotalErrors:        0,
+			TotalSuccess:       0,
+			TotalBytesSent:     0,
+			TotalBytesReceived: 0,
+			TotalDuration:      0,
+			Duration:           0,
+			RequestsMinLatency: 0,
+			RequestsMaxLatency: 0,
+			RequestsPerSecond:  0,
 		},
 	}
 }
@@ -86,7 +86,7 @@ func (o *BenchmarkOptions) runThreads(model *BenchmarkResult, metrics *Metrics) 
 					model.Metrics.TotalRequests++
 					model.Metrics.TotalBytesReceived += len(res.Result)
 					model.Metrics.TotalBytesSent += len(o.Request.Body) + len(o.Request.Headers) + len(o.Request.Url) + len(o.Request.Method)
-	        model.Metrics.RequestsPerSecond = model.Metrics.TotalRequests / o.Duration
+					model.Metrics.RequestsPerSecond = model.Metrics.TotalRequests / o.Duration
 
 					if res.ExecutionTime < model.Metrics.RequestsMinLatency || model.Metrics.RequestsMinLatency == 0 {
 						model.Metrics.RequestsMinLatency = res.ExecutionTime

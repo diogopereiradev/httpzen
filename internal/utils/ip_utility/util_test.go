@@ -60,7 +60,7 @@ func TestFetchIpInfo_CacheHit(t *testing.T) {
 }
 
 func TestFetchIpInfo_Api(t *testing.T) {
-	defer ip_cache_module.ClearCache()	
+	defer ip_cache_module.ClearCache()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp := map[string]any{
