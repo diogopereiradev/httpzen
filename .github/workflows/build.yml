@@ -9,6 +9,7 @@ on:
 
 jobs:
   tests:
+    name: Run Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -24,6 +25,7 @@ jobs:
 
   build:
     needs: tests
+    name: Build Binaries
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -63,6 +65,7 @@ jobs:
 
   release:
     needs: build
+    name: Create Release Draft
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
