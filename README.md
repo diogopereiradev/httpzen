@@ -1,7 +1,6 @@
 <div align="center">
   <img src="assets/logo.png" />
   <div>
-    <img alt="Version" src="https://img.shields.io/github/package-json/v/diogopereiradev/httpzen/latest?style=for-the-badge">
     <img alt="Top language" src="https://img.shields.io/github/languages/top/diogopereiradev/httpzen?style=for-the-badge">
     <img alt="Closed pull requests" src="https://img.shields.io/github/issues-pr-closed-raw/diogopereiradev/httpzen?style=for-the-badge">
     <img alt="GitHub" src="https://img.shields.io/github/license/diogopereiradev/httpzen?style=for-the-badge&cacheSeconds=60">
@@ -12,10 +11,11 @@
 <div align="center">
   <p>HTTPZen is a modern, terminal-based HTTP client designed for developers who want a fast, beautiful, and scriptable way to interact with APIs and web services. Built with Go, HTTPZen offers a rich TUI (Text User Interface) experience, advanced request/response inspection, and flexible configuration.</p>
 
-  [Downloads](#downloads) •
-  [Building from source](#building-from-source) •
-  [Contribute](#contribute)
-  
+  <div>
+    <a href="#downloads">Downloads</a> •
+    <a href="#installation">Building from source</a> •
+    <a href="#contributing">Contribute</a>
+  </div>  
 </div>
 
 ## Features
@@ -29,7 +29,8 @@
 
 <br />
 
-## Downloads [](#downloads)
+<h2>Downloads</h2>
+
 You can downloads the project release on [Downloads](https://github.com/diogopereiradev/httpzen/releases/latest)
 
 <br />
@@ -40,7 +41,7 @@ You can downloads the project release on [Downloads](https://github.com/diogoper
 
 <br />
 
-## Installation
+<h2>Installation</h2>
 
 #### From Source
 ```sh
@@ -108,12 +109,12 @@ make lint
 ```sh
 make build
 ```
-
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
 <br />
 
-## Contributing
+<h2>Contributing</h2>
+
 Contributions are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 <br />
