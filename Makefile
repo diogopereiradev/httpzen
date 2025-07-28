@@ -6,7 +6,7 @@ REPOSITORY := $(shell grep "\[REPOSITORY\]" -A 1 METADATA | awk 'NR==2')
 CURRENT_DATETIME := $(shell date +%Y-%m-%d\ %H:%M:%S)
 LICENSE := $(shell head -n 1 LICENSE)
 
-INTERNAL_DIRS := $(shell find ./internal -mindepth 1 -maxdepth 1 -type d -not -name components -printf './internal/%f/... ')
+INTERNAL_DIRS := $(shell find ./internal -mindepth 1 -maxdepth 1 -type d -not -name components -not -name menus -printf './internal/%f/... ')
 
 # Public targets
 build: clean lint .build .build-linux .build-windows .build-debian .build-rpm .build-flatpak

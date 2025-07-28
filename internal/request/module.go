@@ -13,15 +13,17 @@ import (
 )
 
 type RequestOptions struct {
-	Timeout time.Duration                  `json:"timeout"`
-	Headers http.Header                    `json:"headers"`
-	Body    []http_utility.HttpContentData `json:"body"`
-	Url     string                         `json:"url"`
-	Method  string                         `json:"method"`
+	Timeout     time.Duration                  `json:"timeout"`
+	BypassError bool                           `json:"bypass_error"`
+	Headers     http.Header                    `json:"headers"`
+	Body        []http_utility.HttpContentData `json:"body"`
+	Url         string                         `json:"url"`
+	Method      string                         `json:"method"`
 }
 
 var Exit = os.Exit
 
+var RunRequest = runRequest
 var restyNew = resty.New
 var parseHttpMethod = http_utility.ParseHttpMethod
 var parseUrl = http_utility.ParseUrl
@@ -50,7 +52,7 @@ type RequestResponse struct {
 	Result        string                         `json:"result"`
 }
 
-func RunRequest(options RequestOptions) RequestResponse {
+func runRequest(options RequestOptions) RequestResponse {
 	method := parseHttpMethod(options.Method)
 	url := parseUrl(options.Url)
 	if url == "" {
@@ -83,8 +85,10 @@ func RunRequest(options RequestOptions) RequestResponse {
 
 	res, err := req.Execute(method, url)
 	if err != nil {
-		loggerError("Failed to execute HTTP request: " + err.Error(), 70)
-		Exit(1)
+		if !options.BypassError {
+			loggerError("Failed to execute HTTP request: "+err.Error(), 70)
+			Exit(1)
+		}
 		return RequestResponse{}
 	}
 
