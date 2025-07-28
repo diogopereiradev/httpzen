@@ -95,7 +95,7 @@ func (m model) View() string {
 
 	borderStyle := lipgloss.
 		NewStyle().
-		Width(terminal_utility.GetTerminalWidth(90) - 2).
+		Width(terminal_utility.GetTerminalWidth(90)-2).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(theme.Primary).
 		Padding(0, 3, 1, 3)
@@ -127,7 +127,7 @@ func (m model) View() string {
 		case optionTypeBool:
 			view += "\n" + selectedShortcutStyle.Render("Press 'enter' to toggle('n' to cancel)")
 		case optionTypeNumber:
-			view += "\n" + selectedShortcutStyle.Render("Enter new value and press 'enter' to save('n' to cancel): ") + valueStyle.Render(m.editingValue + string(blinkCursor))
+			view += "\n" + selectedShortcutStyle.Render("Enter new value and press 'enter' to save('n' to cancel): ") + valueStyle.Render(m.editingValue+string(blinkCursor))
 		}
 	}
 
@@ -159,11 +159,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
-		case tea.KeyCtrlC, tea.KeyEsc: return m.quit()
-		case tea.KeyRunes: return m.keyRunes(&msg)
-		case tea.KeyBackspace: return m.backspace()
-		case tea.KeyUp: return m.navigateUp()
-		case tea.KeyDown: return m.navigateDown()
+		case tea.KeyCtrlC, tea.KeyEsc:
+			return m.quit()
+		case tea.KeyRunes:
+			return m.keyRunes(&msg)
+		case tea.KeyBackspace:
+			return m.backspace()
+		case tea.KeyUp:
+			return m.navigateUp()
+		case tea.KeyDown:
+			return m.navigateDown()
 		case tea.KeyEnter:
 			if !m.editing {
 				m.editing = true
@@ -248,7 +253,9 @@ func (m *model) saveChanges() (tea.Model, tea.Cmd) {
 		},
 	}
 
-	if setter, ok := setters[choice.ConfigKey]; ok { setter(&newConfig) }
+	if setter, ok := setters[choice.ConfigKey]; ok {
+		setter(&newConfig)
+	}
 
 	m.config = newConfig
 	m.options = getConfigOptions(&newConfig)

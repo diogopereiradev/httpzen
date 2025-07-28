@@ -18,6 +18,8 @@ var GetHeightFunc = func() (int, error) {
 	return height, err
 }
 
+var Clear = clearFunc
+
 var execCommand = func(name string, arg ...string) *exec.Cmd {
 	return exec.Command(name, arg...)
 }
@@ -50,7 +52,7 @@ func GetTerminalHeight(max int) int {
 	return height
 }
 
-func Clear() {
+func clearFunc() {
 	value, ok := clear[getGOOS()]
 	if ok {
 		value()

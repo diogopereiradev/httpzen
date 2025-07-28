@@ -232,7 +232,7 @@ func TestGetFileByPath(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected valid file")
 	}
-	
+
 	if !info.PathIsValid {
 		t.Errorf("expected valid path")
 	}

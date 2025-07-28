@@ -175,7 +175,7 @@ func Test_Init(t *testing.T) {
 		calledRequestMenu = false
 		cmd := &cobra.Command{Use: "test"}
 		Init(cmd)
-		
+
 		cmd.SetArgs([]string{"GET", "http://test"})
 		cmd.Execute()
 		if !calledRunRequest || !calledRequestMenu {

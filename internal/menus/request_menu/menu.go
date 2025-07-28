@@ -2,14 +2,18 @@ package request_menu
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	benchmark_module "github.com/diogopereiradev/httpzen/internal/benchmark"
+	"github.com/diogopereiradev/httpzen/internal/components/number_prompt"
 	timed_message_component "github.com/diogopereiradev/httpzen/internal/components/timed_message"
 	config_module "github.com/diogopereiradev/httpzen/internal/config"
 	logger_module "github.com/diogopereiradev/httpzen/internal/logger"
+	"github.com/diogopereiradev/httpzen/internal/menus/benchmark_menu"
 	request_module "github.com/diogopereiradev/httpzen/internal/request"
 	logoascii "github.com/diogopereiradev/httpzen/internal/utils/logo_ascii"
 	"github.com/diogopereiradev/httpzen/internal/utils/terminal_utility"
@@ -49,6 +53,9 @@ var RunRequestFunc = request_module.RunRequest
 var ClipboardWriteAll = clipboard.WriteAll
 var TermClear = terminal_utility.Clear
 
+var BenchmarkRequestToRun *request_module.RequestOptions = nil
+
+var StartBenchmarkFunc = StartBenchmark
 var RunProgram = func(p *tea.Program) (tea.Model, error) {
 	return p.Run()
 }
@@ -71,8 +78,13 @@ func New(res *request_module.RequestResponse) {
 	TermClear()
 
 	if _, err := RunProgram(p); err != nil {
-		LoggerError("Error on rendering the program: " + err.Error(), 70)
+		LoggerError("Error on rendering the program: "+err.Error(), 70)
 		Exit(1)
+	}
+
+	if BenchmarkRequestToRun != nil {
+		StartBenchmark(*BenchmarkRequestToRun)
+		BenchmarkRequestToRun = nil
 	}
 }
 
@@ -158,6 +170,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, m.clipboardTimedMessage.Show("Request response copied", 1*time.Second)
 				}
 			}
+			if keyMsg.String() == "b" {
+				BenchmarkRequestToRun = &m.response.Request
+				return m, tea.Quit
+			}
 
 		case tea.KeyCtrlC, tea.KeyEsc:
 			return m, tea.Quit
@@ -222,4 +238,45 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 	return m, nil
+}
+
+func StartBenchmark(req request_module.RequestOptions) {
+	threads := 255
+	duration := 60
+
+	terminal_utility.Clear()
+
+	number_prompt.New(number_prompt.NumberPromptImpl{
+		Title:   "Threads amount",
+		Default: threads,
+		Events: number_prompt.NumberPromptEvents{
+			OnSubmit: func(input string) {
+				var err error
+				th, err := strconv.Atoi(input)
+				if err == nil {
+					threads = th
+				}
+			},
+		},
+	})
+
+	number_prompt.New(number_prompt.NumberPromptImpl{
+		Title:   "Duration amount",
+		Default: duration,
+		Events: number_prompt.NumberPromptEvents{
+			OnSubmit: func(input string) {
+				var err error
+				th, err := strconv.Atoi(input)
+				if err == nil {
+					duration = th
+				}
+			},
+		},
+	})
+
+	benchmark_menu.New(&benchmark_module.BenchmarkOptions{
+		ThreadsAmount: threads,
+		Request:       req,
+		Duration:      duration,
+	})
 }

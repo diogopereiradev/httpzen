@@ -8,21 +8,21 @@ import (
 
 type BlinkCursor struct {
 	char       rune
-	visible     bool
-	blinking bool
+	visible    bool
+	blinking   bool
 	blinkRate  time.Duration
 	blinkTimer tea.Cmd
 }
 
-type BlinkCursorMsg struct {}
+type BlinkCursorMsg struct{}
 
 func initialModel() *BlinkCursor {
 	return &BlinkCursor{
 		char:       '|',
-		visible:     true,
-		blinking:    true,
-		blinkRate:   500 * time.Millisecond,
-		blinkTimer:  nil,
+		visible:    true,
+		blinking:   true,
+		blinkRate:  500 * time.Millisecond,
+		blinkTimer: nil,
 	}
 }
 
