@@ -1,0 +1,84 @@
+name: Release Draft with Binaries
+
+on:
+  push:
+    branches:
+      - latest
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.5'
+
+      - name: Run tests
+        run: make test
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.5'
+
+      - name: Install dependencies
+        run: go mod tidy
+
+      - name: Install fpm
+        run: sudo gem install --no-document fpm
+
+      - name: Install flatpak-builder
+        run: sudo apt-get update && sudo apt-get install -y flatpak-builder
+
+      - name: Install Flatpak runtimes
+        run: |
+          flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak --user install -y flathub org.freedesktop.Sdk//23.08 org.freedesktop.Platform//23.08
+
+      - name: Build using Makefile
+        run: make build
+
+      - name: Upload binaries artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: |
+            build/httpzen*
+            build/debian/*.deb
+            build/flatpak/*.flatpak
+            build/*.rpm
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: build
+
+      - name: Create GitHub Release Draft
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            build/httpzen
+            build/httpzen.exe
+            build/debian/httpzen.deb
+            build/flatpak/httpzen.flatpak
+            build/httpzen.rpm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
