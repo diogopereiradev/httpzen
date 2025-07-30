@@ -17,6 +17,10 @@ httpzen
 # Dependency directories
 **/vendor/
 
+# Docs
+**/docs/node_modules
+**/docs/.nuxt
+
 # Cache and temporary files
 *.out
 *.log
