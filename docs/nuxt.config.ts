@@ -21,5 +21,15 @@ export default defineNuxtConfig({
     ],
   },
 
-  css: ['./app/assets/styles/global.scss'],
+  vite: {
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: `@use "@/assets/styles/theme.scss" as *;`
+        }
+      }
+    },
+  },
+
+  css: ['./app/assets/styles/global.scss',],
 })

@@ -1,14 +1,3 @@
 {
-  "interactive-tui": {
-    "tabs": {
-      "response": "Resposta",
-      "informations": "Informações",
-      "network": "Rede",
-      "request-headers": "Cabeçalhos da Requisição",
-      "response-headers": "Cabeçalhos da Resposta",
-
-      "refetching": "Revalidando",
-      "benchmarking": "Benchmarking"
-    }
-  }
+  "is-out": "está disponível"
 }

@@ -21,10 +21,10 @@
   .component--tab {
     .info {
       font-size: .875rem;
-      color: var(--primary);
+      color: $primary;
       span {
         &.plain {
-          color: var(--on-surface);
+          color: $on-surface;
         }
       }
     }

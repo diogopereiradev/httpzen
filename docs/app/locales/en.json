@@ -1,3 +1,6 @@
 {
-  
+  "is-out": "is out",
+  "title": "HTTPZen - Terminal HTTP Client",
+  "description": "A terminal-based HTTP client to interact with APIs from your terminal. It supports various HTTP methods, benchmarking, and more, making it a powerful tool for developers and API testers.",
+  "installation": "Installation"
 }

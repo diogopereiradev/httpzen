@@ -1,21 +1,34 @@
 <script setup lang="ts">
-  const theme = useTheme();
-  const { locale, setLocale } = useI18n();
 </script>
 
 <template>
-  <div>
-    <button @click="theme.set(theme.current.value === Themes.DARK ? Themes.LIGHT : Themes.DARK)">change theme</button>
-    <button @click="setLocale(locale === 'en' ? 'pt' : 'en')">change language</button>
-    <InteractiveTUI />
+  <div class="component--home">
+    <div class="wrapper">
+      <div class="header">
+        <HomeHeader />
+      </div>
+      <div class="interactive-tui">
+        <InteractiveTUI />
+      </div>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-  div {
-    height: 100vh;
+  .component--home {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    width: 100%;
+    position: relative;
+    .header {
+      position: relative;
+      z-index: 1;
+    }
+    .interactive-tui {
+      position: relative;
+      padding: 0 1rem;
+      margin-top: -10px;
+      z-index: 2;
+    }
   }
 </style>

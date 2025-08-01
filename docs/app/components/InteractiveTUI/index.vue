@@ -87,12 +87,29 @@
 
 <style lang="scss" scoped>
   .component--interactive-tui {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     .interactive-tui {
+      position: relative;
       width: 1000px;
       min-height: 200px;
       padding: 2rem;
-      background-color: var(--surface);
-      border-radius: var(--rounded);
+      background-color: $surface;
+      border-radius: $rounded;
+      border: 10px solid rgba($surface-o3, .15);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      &::before {
+        content: '';
+        position: absolute;
+        top: 1px;
+        left: -1%;
+        width: 102%;
+        height: 10px;
+        border-radius: $rounded $rounded 0 0;
+        z-index: 2;
+      }
       @media screen and (max-width: 1100px) {
         width: 700px;
       }
@@ -140,11 +157,12 @@
             justify-content: center;
             border: none;
             background-color: transparent;
-            color: var(--on-surface);
+            color: $on-surface;
+            border-radius: $rounded;
             transition: .2s;
             cursor: pointer;
             &:hover {
-              background-color: var(--surface-2)
+              background-color: $surface-2
             }
           }
         }
@@ -172,7 +190,7 @@
           bottom: 0;
           width: 105%;
           height: 1px;
-          background-color: var(--primary);
+          background-color: $primary;
           z-index: 1;
         }
         .tab {
@@ -180,18 +198,18 @@
           border-radius: 6px;
           border-bottom-left-radius: 0px;
           border-bottom-right-radius: 0px;
-          border: 1px solid var(--primary);
+          border: 1px solid $primary;
           background-color: transparent;
-          color: var(--on-surface);
+          color: $on-surface;
           font-size: .875rem;
           font-weight: 500;
-          color: var(--on-surface);
+          color: $on-surface;
           cursor: pointer;
           transition: .2s;
           z-index: 2;
           &.active {
-            color: var(--primary);
-            border-bottom: 1px solid var(--surface);
+            color: $primary;
+            border-bottom: 1px solid $surface;
           }
           @media screen and (max-width: 500px) {
             padding: .5rem .875rem;

@@ -14,6 +14,7 @@ $on-background-o3: color.adjust($on-background-o2, $lightness: -30%);
 $primary: #c27231;
 $primary-2: color.adjust($primary, $lightness: 5%);
 $primary-3: color.adjust($primary-2, $lightness: 5%);
+$primary-o2: color.adjust($primary-2, $blackness: 30%);
 
 $on-primary-l: color.adjust($primary, $lightness: 30%);
 $on-primary-m: color.adjust($primary, $lightness: 35%);
@@ -30,6 +31,7 @@ $on-secondary-h: color.adjust($secondary, $lightness: -70%);
 $on-secondary: $on-secondary-m;
 
 $surface: #262f33;
+$surface-2: color.adjust($surface, $lightness: 5%);
 $surface-o2: color.adjust($surface, $lightness: -5%);
 $surface-o3: color.adjust($surface-o2, $lightness: -5%);
 
@@ -80,77 +82,3 @@ $border-input: rgba($on-background, 0.2);
 $border-color: rgba(193, 193, 193, 0.1);
 
 $rounded: 18px;
-
-:root[data-theme="dark"] {
-  --background: #{$background};
-  --on-background-l: #{$on-background-l};
-  --on-background-m: #{$on-background-m};
-  --on-background-h: #{$on-background-h};
-  --on-background: #{$on-background};
-  --on-background-2: #{$on-background-2};
-  --on-background-3: #{$on-background-3};
-  --on-background-o2: #{$on-background-o2};
-  --on-background-o3: #{$on-background-o3};
-
-  --primary: #{$primary};
-  --primary-2: #{$primary-2};
-  --primary-3: #{$primary-3};
-  --on-primary-l: #{$on-primary-l};
-  --on-primary-m: #{$on-primary-m};
-  --on-primary-h: #{$on-primary-h};
-  --on-primary: #{$on-primary};
-  --on-primary-2: #{$on-primary-2};
-  --on-primary-3: #{$on-primary-3};
-
-  --secondary: #{$secondary};
-  --on-secondary-l: #{$on-secondary-l};
-  --on-secondary-m: #{$on-secondary-m};
-  --on-secondary-h: #{$on-secondary-h};
-  --on-secondary: #{$on-secondary};
-
-  --surface: #{$surface};
-  --surface-o2: #{$surface-o2};
-  --surface-o3: #{$surface-o3};
-  --on-surface-l: #{$on-surface-l};
-  --on-surface-m: #{$on-surface-m};
-  --on-surface-h: #{$on-surface-h};
-  --on-surface: #{$on-surface};
-  --on-surface-2: #{$on-surface-2};
-  --on-surface-3: #{$on-surface-3};
-  --on-surface-o2: #{$on-surface-o2};
-  --on-surface-o3: #{$on-surface-o3};
-  --on-surface-primary: #{$on-surface-primary};
-  --on-surface-secondary: #{$on-surface-secondary};
-  --on-surface-on-primary: #{$on-surface-on-primary};
-  --on-surface-on-secondary: #{$on-surface-on-secondary};
-
-  --error: #{$error};
-  --on-error-l: #{$on-error-l};
-  --on-error-m: #{$on-error-m};
-  --on-error-h: #{$on-error-h};
-  --on-error: #{$on-error};
-
-  --success: #{$success};
-  --on-success-l: #{$on-success-l};
-  --on-success-m: #{$on-success-m};
-  --on-success-h: #{$on-success-h};
-  --on-success: #{$on-success};
-
-  --info: #{$info};
-  --on-info-l: #{$on-info-l};
-  --on-info-m: #{$on-info-m};
-  --on-info-h: #{$on-info-h};
-  --on-info: #{$on-info};
-
-  --warning: #{$warning};
-  --on-warning-l: #{$on-warning-l};
-  --on-warning-m: #{$on-warning-m};
-  --on-warning-h: #{$on-warning-h};
-  --on-warning: #{$on-warning};
-
-  --border-layout: #{$border-layout};
-  --border-input: #{$border-input};
-  --border-color: #{$border-color};
-
-  --rounded: #{$rounded};
-}

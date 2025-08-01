@@ -28,6 +28,7 @@
 
 <style lang="scss" scoped>
   .component--tab {
+    position: relative;
     .http-version {
       font-size: .875rem;
       color: #5e6069;
@@ -38,10 +39,10 @@
       margin-top: 1rem;
       .info {
         font-size: .875rem;
-        color: var(--info);
+        color: $info;
         span {
           &.plain {
-            color: var(--on-surface);
+            color: $on-surface;
           }
           &.fast-response {
             color: #13ce66;

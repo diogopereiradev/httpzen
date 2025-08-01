@@ -1,5 +1,4 @@
-@use "./themes/dark.scss";
-@use "./themes/light.scss";
+@use "./theme.scss";
 
 * {
   box-sizing: border-box;
@@ -9,14 +8,14 @@
 }
 
 body {
-  background-color: var(--background);
+  background-color: $background;
   font-family: "JetBrains Mono", Inter, Roboto, sans-serif;
 }
 
 @supports #{'\not selector(::-webkit-scrollbar)'} {
 	* {
 		scrollbar-width: thin;
-		scrollbar-color: var(--surface) transparent;
+		scrollbar-color: $surface transparent;
 	}
 }
 
@@ -28,7 +27,7 @@ body {
 	}
 
 	*::-webkit-scrollbar-thumb {
-		background-color: var(--surface-3) !important;
+		background-color: $surface-2 !important;
 		border-radius: 17px !important;
 		cursor: pointer;
 	}
@@ -44,11 +43,27 @@ body {
 	}
 
 	::-webkit-scrollbar-thumb {
-		background-color: var(--surface-3) !important;
+		background-color: $surface-2 !important;
 		border-radius: 17px !important;
 	}
 
 	.no-scrollbar::-webkit-scrollbar {
 		display: none !important;
+	}
+}
+
+.wrapper {
+	max-width: 2120px;
+	width: 1920px;
+	margin: 0 auto;
+	position: relative;
+	@media screen and (max-width: 1919px) {
+		width: 1600px;
+	}
+	@media screen and (max-width: 1559px) {
+		width: 1300px;
+	}
+	@media screen and (max-width: 1366px) {
+		width: 100%;
 	}
 }

@@ -37,7 +37,7 @@
       color: #973eb3;
     }
     :deep(.vjs-key) {
-      color: var(--info);
+      color: $info;
     }
   }
 </style>

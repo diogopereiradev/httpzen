@@ -8,7 +8,7 @@
   .component--tab {
     .info {
       font-size: .875rem;
-      color: var(--warning);
+      color: $warning;
     }
   }
 </style>
