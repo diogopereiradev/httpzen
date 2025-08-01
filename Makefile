@@ -9,7 +9,7 @@ LICENSE := $(shell head -n 1 LICENSE)
 INTERNAL_DIRS := $(shell find ./internal -mindepth 1 -maxdepth 1 -type d -not -name components -not -name menus -printf './internal/%f/... ')
 
 # Public targets
-build: clean lint .build .build-linux .build-windows .build-debian .build-rpm .build-flatpak
+build: clean lint .change-package-json-version .build .build-linux .build-windows .build-debian .build-rpm .build-flatpak
 
 test:
 	@echo "\033[33m[Make]\033[0m \033[32mRunning tests...\033[0m"
@@ -43,6 +43,16 @@ clean: .debian-clean
 	@echo "\033[33m[Make]\033[0m \033[32mCleaned.\033[0m"
 
 # Internal targets
+
+.change-package-json-version:
+	@echo "\033[33m[Make]\033[0m \033[32mUpdating version of package.json...\033[0m"
+	@if [ -f ./docs/package.json ]; then \
+	sed -i 's/\("version" *: *\)"[^"]*"/\1"$(VERSION)"/' ./docs/package.json; \
+	echo "\033[33m[Make]\033[0m \033[32mpackage.json version updated to $(VERSION).\033[0m"; \
+	else \
+	echo "\033[33m[Make]\033[0m \033[31mpackage.json not found in ./docs.\033[0m"; \
+	fi
+
 .build:
 	@echo "\033[33m[Make]\033[0m \033[32mBuilding...\033[0m"
 	@mkdir -p ./build
