@@ -1,3 +1,45 @@
 {
-  "is-out": "está disponível"
+  "is-out": "está disponível",
+  "title": "HTTPZen - Cliente HTTP de Terminal",
+  "description": "Uma CLI para interagir com APIs direto do terminal. Suporta vários métodos HTTP, benchmarking, consulta de IP e mais — focada em produtividade.",
+  "installation": "Instalação",
+  "nav": {
+    "features": "Recursos",
+    "install": "Instalar",
+    "docs": "Docs"
+  },
+  "features": {
+    "title": "Por que o httpzen?",
+    "subtitle": "Rápido, ergonômico e feito para power users.",
+    "fast": "CLI rápida",
+    "fast-desc": "Baixa sobrecarga e feedback instantâneo para seu fluxo com APIs.",
+    "bench": "Benchmarking",
+    "bench-desc": "Benchmark integrado para comparar endpoints e medir latência.",
+    "inspect": "Inspeção profunda",
+    "inspect-desc": "Inspecione requisições, respostas, headers e detalhes de rede.",
+    "iplookup": "Consulta de IP",
+    "iplookup-desc": "Descubra seu IP e informações de rede rapidamente.",
+    "shortcuts": "Atalhos",
+    "shortcuts-desc": "Navegue com atalhos de teclado e agilize tarefas.",
+    "pretty": "Saída legível",
+    "pretty-desc": "Saída colorida e legível para JSON e payloads comuns."
+  },
+  "install": {
+    "title": "Comece rápido",
+    "subtitle": "Baixe o pacote para sua distro ou o binário standalone.",
+    "open-releases": "Abrir releases",
+    "after-download": "Após o download:",
+    "binary": { "title": "Binário", "desc": "Executável standalone para qualquer distro Linux." },
+    "deb": { "title": "Debian/Ubuntu (.deb)", "desc": "Instalação via apt em distros baseadas em Debian." },
+    "rpm": { "title": "Fedora/RHEL (.rpm)", "desc": "Instalação via dnf/yum em distros baseadas em RPM." },
+    "flatpak": { "title": "Flatpak", "desc": "Instalação via pacote Flatpak." }
+  },
+  "docs": {
+    "title": "Documentação",
+    "subtitle": "Leia o guia de uso, flags e fluxos avançados.",
+    "read": "Ler documentação"
+  },
+  "footer": {
+    "made": "Feito com ❤️ por diogopereiradev"
+  }
 }

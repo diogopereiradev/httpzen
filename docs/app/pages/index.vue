@@ -1,34 +1,29 @@
-<script setup lang="ts">
-</script>
-
 <template>
-  <div class="component--home">
+  <div class="page--home">
     <div class="wrapper">
-      <div class="header">
-        <HomeHeader />
-      </div>
-      <div class="interactive-tui">
-        <InteractiveTUI />
+      <HomeHeader />
+      <InteractiveTUI />
+      <div class="content">
+        <HomeFeatures />
+        <HomeInstallation />
+        <HomeFooter />
       </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-  .component--home {
+  .page--home {
     display: flex;
     flex-direction: column;
     width: 100%;
     position: relative;
-    .header {
-      position: relative;
-      z-index: 1;
-    }
-    .interactive-tui {
-      position: relative;
-      padding: 0 1rem;
-      margin-top: -10px;
-      z-index: 2;
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: 4rem;
+      width: 100%;
+      margin-top: 4rem;
     }
   }
 </style>

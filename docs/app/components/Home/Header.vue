@@ -23,6 +23,9 @@
         <div class="version"><p>v{{ pkg.version.split('.')[0] }}.{{ pkg.version.split('.')[1] }}</p></div>
       </div>
       <div class="right">
+        <NuxtLink to="#features" class="nav-link">{{ $t('nav.features') }}</NuxtLink>
+        <NuxtLink to="#install" class="nav-link">{{ $t('nav.install') }}</NuxtLink>
+        <NuxtLink to="#docs" class="nav-link">{{ $t('nav.docs') }}</NuxtLink>
         <a href="https://github.com/diogopereiradev/httpzen" target="_blank" title="GitHub">
           <Icon name="f7:logo-github" size="24" />
         </a>
@@ -46,7 +49,7 @@
             <Icon v-else name="material-symbols:check-rounded" size="20" />
           </button>
         </div>
-        <NuxtLink to="#" class="install-button">
+          <NuxtLink to="#install" class="install-button">
           <span>{{ $t('installation') }}</span>
           <Icon name="material-symbols:arrow-right-alt-rounded" size="18" />
         </NuxtLink>
@@ -94,6 +97,19 @@
         display: flex;
         align-items: center;
         gap: .875rem;
+        .nav-link {
+          color: $on-background;
+          text-decoration: none;
+          font-size: .9rem;
+          padding: .25rem .5rem;
+          border-radius: 8px;
+          transition: .2s;
+          margin-top: -8px;
+          &:hover {
+            color: $primary;
+            background: rgba($primary, .08);
+          }
+        }
         .theme-toggle {
           border: none;
           background: transparent;
