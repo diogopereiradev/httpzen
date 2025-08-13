@@ -1,0 +1,84 @@
+@use "sass:color";
+
+$background: #1c2225;
+
+$on-background-l: color.adjust($background, $lightness: 50%);
+$on-background-m: color.adjust($background, $lightness: 70%);
+$on-background-h: color.adjust($background, $lightness: 90%);
+$on-background: $on-background-m;
+$on-background-2: color.adjust($on-background, $lightness: 10%);
+$on-background-3: color.adjust($on-background-2, $lightness: 10%);
+$on-background-o2: color.adjust($on-background, $lightness: -20%);
+$on-background-o3: color.adjust($on-background-o2, $lightness: -30%);
+
+$primary: #c27231;
+$primary-2: color.adjust($primary, $lightness: 5%);
+$primary-3: color.adjust($primary-2, $lightness: 5%);
+$primary-o2: color.adjust($primary-2, $blackness: 30%);
+
+$on-primary-l: color.adjust($primary, $lightness: 30%);
+$on-primary-m: color.adjust($primary, $lightness: 35%);
+$on-primary-h: color.adjust($primary, $lightness: 40%);
+$on-primary: $on-primary-m;
+$on-primary-2: color.adjust($on-primary, $lightness: 5%);
+$on-primary-3: color.adjust($on-primary-2, $lightness: 5%);
+
+$secondary: #278695;
+
+$on-secondary-l: color.adjust($secondary, $lightness: -30%);
+$on-secondary-m: color.adjust($secondary, $lightness: -50%);
+$on-secondary-h: color.adjust($secondary, $lightness: -70%);
+$on-secondary: $on-secondary-m;
+
+$surface: #262f33;
+$surface-2: color.adjust($surface, $lightness: 5%);
+$surface-o2: color.adjust($surface, $lightness: -5%);
+$surface-o3: color.adjust($surface-o2, $lightness: -5%);
+
+$on-surface-l: color.adjust($surface, $lightness: 40%);
+$on-surface-m: color.adjust($surface, $lightness: 60%);
+$on-surface-h: color.adjust($surface, $lightness: 80%);
+$on-surface: $on-surface-m;
+$on-surface-2: color.adjust($on-surface, $lightness: 5%);
+$on-surface-3: color.adjust($on-surface-2, $lightness: 5%);
+$on-surface-o2: color.adjust($on-surface, $lightness: -15%);
+$on-surface-o3: color.adjust($on-surface-o2, $lightness: -15%);
+
+$on-surface-primary: color.adjust($primary, $lightness: 10%);
+$on-surface-secondary: color.adjust($secondary, $lightness: 10%);
+$on-surface-on-primary: color.adjust($on-surface-primary, $lightness: 5%);
+$on-surface-on-secondary: color.adjust($on-surface-secondary, $lightness: 5%);
+
+$error: #D06060;
+
+$on-error-l: color.adjust($error, $lightness: 28%);
+$on-error-m: color.adjust($error, $lightness: 36%);
+$on-error-h: color.adjust($error, $lightness: 44%);
+$on-error: $on-error-m;
+
+$success: #6AB67A;
+
+$on-success-l: color.adjust($success, $lightness: 30%);
+$on-success-m: color.adjust($success, $lightness: 40%);
+$on-success-h: color.adjust($success, $lightness: 50%);
+$on-success: $on-success-m;
+
+$info: #3986C7;
+
+$on-info-l: color.adjust($info, $lightness: 15%);
+$on-info-m: color.adjust($info, $lightness: 30%);
+$on-info-h: color.adjust($info, $lightness: 45%);
+$on-info: $on-info-m;
+
+$warning: #E0A028;
+
+$on-warning-l: color.adjust($warning, $lightness: -10%);
+$on-warning-m: color.adjust($warning, $lightness: -20%);
+$on-warning-h: color.adjust($warning, $lightness: -30%);
+$on-warning: $on-warning-m;
+
+$border-layout: rgba($on-background, 0.1);
+$border-input: rgba($on-background, 0.2);
+$border-color: rgba(193, 193, 193, 0.1);
+
+$rounded: 18px;

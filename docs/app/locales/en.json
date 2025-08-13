@@ -1,0 +1,45 @@
+{
+  "is-out": "is out",
+  "title": "HTTPZen - Terminal HTTP Client",
+  "description": "A terminal-based HTTP client to interact with APIs from your terminal. It supports various HTTP methods, benchmarking, and more, making it a powerful tool for developers and API testers.",
+  "installation": "Installation",
+  "nav": {
+    "features": "Features",
+    "install": "Install",
+    "docs": "Docs"
+  },
+  "features": {
+    "title": "Why httpzen?",
+    "subtitle": "Fast, ergonomic and made for power users.",
+    "fast": "Fast CLI",
+    "fast-desc": "Low overhead and instant feedback for your API workflows.",
+    "bench": "Benchmarking",
+    "bench-desc": "Built-in benchmarking to compare endpoints and measure latency.",
+    "inspect": "Deep Inspection",
+    "inspect-desc": "Inspect requests, responses, headers and network details.",
+    "iplookup": "IP Lookup",
+    "iplookup-desc": "Look up your IP and related network information quickly.",
+    "shortcuts": "Shortcuts",
+    "shortcuts-desc": "Navigate with handy keyboard shortcuts to speed up tasks.",
+    "pretty": "Pretty Output",
+    "pretty-desc": "Readable, colorized output for JSON and common payloads."
+  },
+  "install": {
+    "title": "Quick start",
+    "subtitle": "Download a package for your distro or the standalone binary.",
+    "open-releases": "Open releases",
+    "after-download": "After download:",
+    "binary": { "title": "Binary", "desc": "Standalone executable for any Linux distro." },
+    "deb": { "title": "Debian/Ubuntu (.deb)", "desc": "Install with apt on Debian-based distros." },
+    "rpm": { "title": "Fedora/RHEL (.rpm)", "desc": "Install with dnf/yum on RPM-based distros." },
+    "flatpak": { "title": "Flatpak", "desc": "Install via Flatpak package." }
+  },
+  "docs": {
+    "title": "Documentation",
+    "subtitle": "Read the usage guide, flags and advanced workflows.",
+    "read": "Read the docs"
+  },
+  "footer": {
+    "made": "Made with ❤️ by diogopereiradev"
+  }
+}
