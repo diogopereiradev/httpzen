@@ -92,7 +92,7 @@ jobs:
           $version = Get-SectionValue 'VERSION'
           $website = Get-SectionValue 'WEBSITE'
           $repository = Get-SectionValue 'REPOSITORY'
-          $license = (Get-Content LICENSE -TotalCount 1)
+          $license = (Get-Content LICENSE -TotalCount 1).Trim()
           $buildDate = (Get-Date).ToString('o')
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "website=$website" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
@@ -160,13 +160,16 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path build | Out-Null
-          $ld = @(
-            '-X', "github.com/diogopereiradev/httpzen/cmd/commands/version.Version=${{ steps.meta.outputs.version }}",
-            '-X', "github.com/diogopereiradev/httpzen/cmd/commands/version.BuildDate=${{ steps.meta.outputs.buildDate }}",
-            '-X', "github.com/diogopereiradev/httpzen/cmd/commands/version.Website=${{ steps.meta.outputs.website }}",
-            '-X', "github.com/diogopereiradev/httpzen/cmd/commands/version.Repository=${{ steps.meta.outputs.repository }}",
-            '-X', "github.com/diogopereiradev/httpzen/cmd/commands/version.License=${{ steps.meta.outputs.license }}"
-          ) -join ' '
+          $v  = '${{ steps.meta.outputs.version }}'
+          $bd = '${{ steps.meta.outputs.buildDate }}'
+          $ws = '${{ steps.meta.outputs.website }}'
+          $rp = '${{ steps.meta.outputs.repository }}'
+          $lc = '${{ steps.meta.outputs.license }}'
+          $ld = "-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Version=$v' " +
+            "-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.BuildDate=$bd' " +
+            "-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Website=$ws' " +
+            "-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Repository=$rp' " +
+            "-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.License=$lc'"
           go build -ldflags "$ld" -o build/httpzen.exe main.go
 
       - name: Code sign with signtool
