@@ -72,11 +72,13 @@
           <span class="icon"><Icon name="gravity-ui:layout-header-cells-large-thunderbolt" size="20" /></span>
         </button>
       </div>
-      <InteractiveTUITabsResponse v-if="state.activeTab === Tabs.RESPONSE" />
-      <InteractiveTUITabsInformations v-if="state.activeTab === Tabs.INFOS" />
-      <InteractiveTUITabsNetwork v-if="state.activeTab === Tabs.NETWORK" />
-      <InteractiveTUITabsRequestHeaders v-if="state.activeTab === Tabs.REQUEST_HEADERS" />
-      <InteractiveTUITabsResponseHeaders v-if="state.activeTab === Tabs.RESPONSE_HEADERS" />
+      <ClientOnly>
+        <InteractiveTUITabsResponse v-if="state.activeTab === Tabs.RESPONSE" />
+        <InteractiveTUITabsInformations v-if="state.activeTab === Tabs.INFOS" />
+        <InteractiveTUITabsNetwork v-if="state.activeTab === Tabs.NETWORK" />
+        <InteractiveTUITabsRequestHeaders v-if="state.activeTab === Tabs.REQUEST_HEADERS" />
+        <InteractiveTUITabsResponseHeaders v-if="state.activeTab === Tabs.RESPONSE_HEADERS" />
+      </ClientOnly>
       <div class="navigation-infos">
         <p class="info">Use left/right arrows to navigate between tabs, 'q' to quit.</p>
         <p class="info">'c' to copy response, 'b' to benchmark, 'r' to resend request.</p>

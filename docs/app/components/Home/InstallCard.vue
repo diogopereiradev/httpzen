@@ -10,7 +10,19 @@
     codeToCopy: string;
     alt?: boolean;
   }>();
-  const { copyToClipboard } = useUtils();
+  const utils = useUtils();
+
+  const state = reactive({
+    copied: false,
+  });
+
+  const copyToClipboard = (text: string) => {
+    utils.copyToClipboard(text);
+    state.copied = true;
+    setTimeout(() => {
+      state.copied = false;
+    }, 2000);
+  };
 </script>
 
 <template>
@@ -30,7 +42,8 @@
     <div class="code-block" :class="{ alt: props.alt }">
       <span>$ {{ props.code }}</span>
       <button class="copy" @click="copyToClipboard(props.codeToCopy)">
-        <Icon name="mdi:content-copy" size="18" />
+        <Icon v-if="!state.copied" name="mdi:content-copy" size="20" />
+        <Icon v-else name="material-symbols:check-rounded" size="20" />
       </button>
     </div>
   </div>
