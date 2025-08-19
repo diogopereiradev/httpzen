@@ -69,7 +69,7 @@ jobs:
     name: Build and Sign Windows Binary
     runs-on: windows-latest
     env:
-      TIMESTAMP_URL: https://timestamp.sectigo.com
+      TIMESTAMP_URL: http://timestamp.sectigo.com
       SIGNING_CERT_BASE64: ${{ secrets.SIGNING_CERT_BASE64 }}
       SIGNING_CERT_PASSWORD: ${{ secrets.SIGNING_CERT_PASSWORD }}
     steps:
@@ -206,15 +206,29 @@ jobs:
             Write-Error 'signtool.exe not found on PATH or in standard SDK locations.'
             exit 1
           }
+          # Prefer RFC3161 over HTTPS issues: ensure http schema and fallback to DigiCert if needed
+          $tsUrl = $env:TIMESTAMP_URL
+          if ($tsUrl -match '^https://') { $tsUrl = $tsUrl -replace '^https://', 'http://' }
           [IO.File]::WriteAllBytes('codesign.pfx', [Convert]::FromBase64String($env:SIGNING_CERT_BASE64))
           & $signtool sign `
             /f codesign.pfx `
             /p "$env:SIGNING_CERT_PASSWORD" `
             /fd sha256 `
-            /tr $env:TIMESTAMP_URL `
+            /tr $tsUrl `
             /td sha256 `
             /v `
             build/httpzen.exe
+          if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Primary timestamp server failed ($tsUrl). Retrying with DigiCert..."
+            & $signtool sign `
+              /f codesign.pfx `
+              /p "$env:SIGNING_CERT_PASSWORD" `
+              /fd sha256 `
+              /tr http://timestamp.digicert.com `
+              /td sha256 `
+              /v `
+              build/httpzen.exe
+          }
 
       - name: Upload Windows signed binary
         uses: actions/upload-artifact@v4
