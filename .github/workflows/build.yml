@@ -70,6 +70,8 @@ jobs:
     runs-on: windows-latest
     env:
       TIMESTAMP_URL: https://timestamp.sectigo.com
+      SIGNING_CERT_BASE64: ${{ secrets.SIGNING_CERT_BASE64 }}
+      SIGNING_CERT_PASSWORD: ${{ secrets.SIGNING_CERT_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -168,10 +170,7 @@ jobs:
           go build -ldflags "$ld" -o build/httpzen.exe main.go
 
       - name: Code sign with signtool
-        if: ${{ secrets.SIGNING_CERT_BASE64 != '' }}
-        env:
-          SIGNING_CERT_BASE64: ${{ secrets.SIGNING_CERT_BASE64 }}
-          SIGNING_CERT_PASSWORD: ${{ secrets.SIGNING_CERT_PASSWORD }}
+        if: env.SIGNING_CERT_BASE64 != ''
         shell: pwsh
         run: |
           if ([string]::IsNullOrWhiteSpace($env:SIGNING_CERT_BASE64)) {
