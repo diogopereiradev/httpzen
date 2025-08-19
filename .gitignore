@@ -12,6 +12,9 @@
 **/bin/
 **/usr
 **/.flatpak-builder
+**/winres
+rsrc_windows_386.syso
+rsrc_windows_amd64.syso
 httpzen
 
 # Dependency directories

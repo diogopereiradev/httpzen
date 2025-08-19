@@ -1,4 +1,5 @@
 .PHONY: build test lint clean
+.ONESHELL:
 
 VERSION := $(shell grep "\[VERSION\]" -A 1 METADATA | awk 'NR==2')
 WEBSITE := $(shell grep "\[WEBSITE\]" -A 1 METADATA | awk 'NR==2')
@@ -40,10 +41,10 @@ clean: .debian-clean
 	@echo "\033[33m[Make]\033[0m \033[32mCleaning up build folder...\033[0m"
 	@rm -rf ./build	
 	@rm -rf ./.flatpak-builder
+	@rm -f ./rsrc_windows_*.syso
 	@echo "\033[33m[Make]\033[0m \033[32mCleaned.\033[0m"
 
 # Internal targets
-
 .change-package-json-version:
 	@echo "\033[33m[Make]\033[0m \033[32mUpdating version of package.json...\033[0m"
 	@if [ -f ./docs/package.json ]; then \
@@ -70,6 +71,7 @@ clean: .debian-clean
 
 .build-windows:
 	@echo "\033[33m[Make]\033[0m \033[32mBuilding Windows binary...\033[0m"
+	@$(MAKE) .winres
 	@GOOS=windows GOARCH=amd64 go build \
 		-ldflags="-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Version=$(VERSION)' \
 		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.BuildDate=$(CURRENT_DATETIME)' \
@@ -78,6 +80,56 @@ clean: .debian-clean
 		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.License=$(LICENSE)'" \
 		-o ./build/httpzen.exe main.go
 	@echo "\033[33m[Make]\033[0m \033[32mWindows binary build finished.\033[0m"
+
+.winres:
+	@echo "\033[33m[Make]\033[0m \033[32mPreparing Windows resources (version info, manifest, icon)...\033[0m"
+	@go install github.com/tc-hib/go-winres@v0.3.3 || go install github.com/tc-hib/go-winres@latest
+	@mkdir -p ./winres
+	@echo "\033[33m[Make]\033[0m \033[32mGenerating winres.json...\033[0m"
+	@cat > ./winres/winres.json <<-'EOF'
+	{
+		"RT_VERSION": {
+			"#1": {
+				"0000": {
+					"fixed": {
+						"file_version": "$(VERSION).0",
+						"product_version": "$(VERSION).0"
+					},
+					"info": {
+						"0409": {
+							"CompanyName": "diogopereiradev",
+							"FileDescription": "httpzen - HTTP client TUI/CLI",
+							"FileVersion": "$(VERSION).0",
+							"OriginalFilename": "httpzen.exe",
+							"ProductName": "httpzen",
+							"ProductVersion": "$(VERSION)",
+							"Comments": "$(WEBSITE)",
+							"LegalCopyright": "$(LICENSE)"
+						}
+					}
+				}
+			}
+		},
+		"RT_MANIFEST": {
+			"#1": {
+				"0409": {
+					"execution-level": "as invoker",
+					"dpi-awareness": "per monitor v2",
+					"minimum-os": "win7",
+					"use-common-controls-v6": true
+				}
+			}
+		},
+		"RT_GROUP_ICON": {
+			"APP": {
+				"0000": "../docs/public/favicons/favicon-96x96.png"
+			}
+		}
+	}
+	EOF
+	@echo "\033[33m[Make]\033[0m \033[32mEmbedding Windows resources with go-winres...\033[0m"
+	@go-winres make
+	@echo "\033[33m[Make]\033[0m \033[32mWindows resources ready.\033[0m"
 
 .debian-clean:
 	@echo "\033[33m[Make]\033[0m \033[32mCleaning up Debian build...\033[0m"
