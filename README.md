@@ -16,6 +16,8 @@
     <a href="#installation">Building from source</a> •
     <a href="#contributing">Contribute</a>
   </div>  
+  <br />
+  <img src="/assets/use-demo.gif" alt="use-demo-gif" />
 </div>
 
 ## Features
