@@ -1,5 +1,6 @@
 <script setup>
   useHead({
+    title: 'HTTPzen - Terminal HTTP Client',
     meta: [
       {
         name: 'description',
@@ -15,7 +16,7 @@
       },
       {
         property: 'og:image',
-        content: ''
+        content: '/images/banner.jpg'
       },
       {
         property: 'og:type',
@@ -26,6 +27,10 @@
         content: 'https://httpzen.diogopereira.site'
       },
       {
+        name: 'robots',
+        content: 'index, follow'
+      },
+      {
         name: 'keywords',
         content: 'httpzen, http, api, rest, web development, software development, programming'
       },
@@ -33,7 +38,11 @@
         name: 'charset',
         content: 'UTF-8'
       },
-      { name: 'apple-mobile-web-app-title', content: 'Httpzen' }
+      { name: 'apple-mobile-web-app-title', content: 'Httpzen' },
+      {
+        name: 'theme-color',
+        content: '#e86d01'
+      }
     ],
     link: [
       { rel: 'icon', type: 'image/png', href: '/favicons/favicon-96x96.png', sizes: '96x96' },

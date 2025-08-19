@@ -27,7 +27,7 @@
   "install": {
     "title": "Quick start",
     "subtitle": "Download a package for your distro or the standalone binary.",
-    "open-releases": "Open releases",
+    "open-releases": "Download",
     "after-download": "After download:",
     "binary": { "title": "Binary", "desc": "Standalone executable for any Linux distro." },
     "deb": { "title": "Debian/Ubuntu (.deb)", "desc": "Install with apt on Debian-based distros." },
