@@ -1,5 +1,8 @@
 <script setup>
   useHead({
+    htmlAttrs: {
+      lang: 'en',
+    },
     title: 'HTTPzen - Terminal HTTP Client',
     meta: [
       {
@@ -16,7 +19,7 @@
       },
       {
         property: 'og:image',
-        content: '/images/banner.jpg'
+        content: 'https://httpzen.diogopereira.site/images/banner.jpg'
       },
       {
         property: 'og:type',
@@ -42,7 +45,27 @@
       {
         name: 'theme-color',
         content: '#e86d01'
-      }
+      },
+      {
+        name: 'twitter:card',
+        content: 'summary_large_image'
+      },
+      {
+        name: 'twitter:title',
+        content: 'Httpzen - HTTP Client for APIs'
+      },
+      {
+        name: 'twitter:description',
+        content: 'Httpzen is a powerful HTTP client for building and testing APIs, designed to streamline your web development workflow.'
+      },
+      {
+        name: 'twitter:image',
+        content: 'https://httpzen.diogopereira.site/images/banner.jpg'
+      },
+      {
+        name: 'twitter:url',
+        content: 'https://httpzen.diogopereira.site'
+      },
     ],
     link: [
       { rel: 'icon', type: 'image/png', href: '/favicons/favicon-96x96.png', sizes: '96x96' },
