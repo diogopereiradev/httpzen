@@ -1,4 +1,4 @@
-.PHONY: build test lint clean
+.PHONY: build test lint clean sign-windows verify-signature
 .ONESHELL:
 
 VERSION := $(shell grep "\[VERSION\]" -A 1 METADATA | awk 'NR==2')
@@ -11,6 +11,21 @@ INTERNAL_DIRS := $(shell find ./internal -mindepth 1 -maxdepth 1 -type d -not -n
 
 # Public targets
 build: clean lint .change-package-json-version .build .build-linux .build-windows .build-debian .build-rpm .build-flatpak
+
+# Sign the Windows binary (optional, requires certificate)
+# Usage examples:
+#  make sign-windows SIGN_PFX=</path/cert.pfx> SIGN_PFX_PASS=<password>
+#  make sign-windows SIGN_CERT=</path/cert.pem> SIGN_KEY=</path/key.pem> SIGN_KEY_PASS=<optional>
+# Optional metadata overrides: SIGN_NAME and SIGN_URL
+sign-windows: .build-windows .sign-windows
+
+# Verify Authenticode signature on the built exe
+verify-signature:
+	@which osslsigncode >/dev/null 2>&1 || { echo "\033[33m[Make]\033[0m \033[31mosslsigncode not found. Install it (e.g., apt install osslsigncode).\033[0m"; exit 1; }
+	@[ -f ./build/httpzen.exe ] || { echo "\033[33m[Make]\033[0m \033[31mFile ./build/httpzen.exe not found. Build first.\033[0m"; exit 1; }
+	@echo "\033[33m[Make]\033[0m \033[32mVerifying signature of httpzen.exe...\033[0m"
+	@osslsigncode verify -in ./build/httpzen.exe || { echo "\033[33m[Make]\033[0m \033[31mSignature verification failed.\033[0m"; exit 1; }
+	@echo "\033[33m[Make]\033[0m \033[32mSignature verified.\033[0m"
 
 test:
 	@echo "\033[33m[Make]\033[0m \033[32mRunning tests...\033[0m"
@@ -80,6 +95,37 @@ clean: .debian-clean
 		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.License=$(LICENSE)'" \
 		-o ./build/httpzen.exe main.go
 	@echo "\033[33m[Make]\033[0m \033[32mWindows binary build finished.\033[0m"
+
+# Internal: sign Windows binary with osslsigncode (PFX or CERT/KEY)
+# Inputs (env vars):
+#  SIGN_PFX, SIGN_PFX_PASS  - OR -  SIGN_CERT, SIGN_KEY, SIGN_KEY_PASS
+#  SIGN_NAME (default: httpzen), SIGN_URL (default: $(WEBSITE))
+#  SIGN_TSA_URL (default: http://timestamp.digicert.com)
+.sign-windows:
+	@which osslsigncode >/dev/null 2>&1 || { echo "\033[33m[Make]\033[0m \033[31mosslsigncode not found. Install it (e.g., apt install osslsigncode).\033[0m"; exit 1; }
+	@[ -f ./build/httpzen.exe ] || { echo "\033[33m[Make]\033[0m \033[31mFile ./build/httpzen.exe not found. Build first.\033[0m"; exit 1; }
+	@SIGN_NAME_EFF=$${SIGN_NAME:-httpzen}; \
+	SIGN_URL_EFF=$${SIGN_URL:-"$(WEBSITE)"}; \
+	SIGN_TSA_EFF=$${SIGN_TSA_URL:-http://timestamp.digicert.com}; \
+	OUT=./build/httpzen.exe.signed; \
+	set -e; \
+	echo "\033[33m[Make]\033[0m \033[32mSigning Windows binary with osslsigncode...\033[0m"; \
+	if [ -n "$$SIGN_PFX" ]; then \
+		[ -f "$$SIGN_PFX" ] || { echo "\033[33m[Make]\033[0m \033[31mSIGN_PFX not found: $$SIGN_PFX\033[0m"; exit 1; }; \
+		[ -n "$$SIGN_PFX_PASS" ] || { echo "\033[33m[Make]\033[0m \033[31mSIGN_PFX_PASS not set.\033[0m"; exit 1; }; \
+		osslsigncode sign -h sha256 -pkcs12 "$$SIGN_PFX" -pass "$$SIGN_PFX_PASS" -n "$$SIGN_NAME_EFF" -i "$$SIGN_URL_EFF" -t "$$SIGN_TSA_EFF" -in ./build/httpzen.exe -out "$$OUT"; \
+	elif [ -n "$$SIGN_CERT" ] && [ -n "$$SIGN_KEY" ]; then \
+		[ -f "$$SIGN_CERT" ] || { echo "\033[33m[Make]\033[0m \033[31mSIGN_CERT not found: $$SIGN_CERT\033[0m"; exit 1; }; \
+		[ -f "$$SIGN_KEY" ] || { echo "\033[33m[Make]\033[0m \033[31mSIGN_KEY not found: $$SIGN_KEY\033[0m"; exit 1; }; \
+		if [ -n "$$SIGN_KEY_PASS" ]; then \
+			osslsigncode sign -h sha256 -certs "$$SIGN_CERT" -key "$$SIGN_KEY" -pass "$$SIGN_KEY_PASS" -n "$$SIGN_NAME_EFF" -i "$$SIGN_URL_EFF" -t "$$SIGN_TSA_EFF" -in ./build/httpzen.exe -out "$$OUT"; \
+		else \
+			osslsigncode sign -h sha256 -certs "$$SIGN_CERT" -key "$$SIGN_KEY" -n "$$SIGN_NAME_EFF" -i "$$SIGN_URL_EFF" -t "$$SIGN_TSA_EFF" -in ./build/httpzen.exe -out "$$OUT"; \
+		fi; \
+	else \
+		echo "\033[33m[Make]\033[0m \033[31mNo certificate specified. Provide SIGN_PFX (and SIGN_PFX_PASS) or SIGN_CERT and SIGN_KEY.\033[0m"; exit 1; \
+	fi; \
+	osslsigncode verify -in "$$OUT" >/dev/null 2>&1 && mv -f "$$OUT" ./build/httpzen.exe || { echo "\033[33m[Make]\033[0m \033[31mSignature verification failed.\033[0m"; rm -f "$$OUT"; exit 1; }
 
 .winres:
 	@echo "\033[33m[Make]\033[0m \033[32mPreparing Windows resources (version info, manifest, icon)...\033[0m"
