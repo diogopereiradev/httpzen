@@ -11,7 +11,7 @@ on:
 jobs:
   tests:
     name: Run Tests
-    runs-on: ubuntu-latest
+  runs-on: [self-hosted, linux]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,7 +27,7 @@ jobs:
   build-linux:
     needs: tests
     name: Build Linux Artifacts
-    runs-on: ubuntu-latest
+  runs-on: [self-hosted, linux]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -67,7 +67,7 @@ jobs:
   build-windows-sign:
     needs: tests
     name: Build and Sign Windows Binary
-    runs-on: windows-latest
+  runs-on: [self-hosted, windows]
     env:
       TIMESTAMP_URL: https://timestamp.sectigo.com
       SIGNING_CERT_BASE64: ${{ secrets.SIGNING_CERT_BASE64 }}
@@ -180,8 +180,34 @@ jobs:
             Write-Host 'SIGNING_CERT_BASE64 not set. Skipping signing.'
             exit 0
           }
+          # Locate signtool.exe from installed Windows SDKs
+          $signtool = $null
+          $searchPatterns = @(
+            'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\*\\x64\\signtool.exe',
+            'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\*\\x86\\signtool.exe',
+            'C:\\Program Files (x86)\\Windows Kits\\11\\bin\\*\\x64\\signtool.exe',
+            'C:\\Program Files (x86)\\Windows Kits\\11\\bin\\*\\x86\\signtool.exe'
+          )
+          foreach ($pattern in $searchPatterns) {
+            $cand = Get-ChildItem -Path $pattern -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | Select-Object -First 1
+            if ($cand) { $signtool = $cand.FullName; break }
+          }
+          if (-not $signtool) {
+            $vswhere = "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+            if (Test-Path $vswhere) {
+              $vsInst = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
+              if ($vsInst) {
+                $cand = Get-ChildItem -Path (Join-Path $vsInst 'SDK\ScopeCppSDK\bin\*\x64\signtool.exe') -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($cand) { $signtool = $cand.FullName }
+              }
+            }
+          }
+          if (-not $signtool) {
+            Write-Error 'signtool.exe not found on PATH or in standard SDK locations.'
+            exit 1
+          }
           [IO.File]::WriteAllBytes('codesign.pfx', [Convert]::FromBase64String($env:SIGNING_CERT_BASE64))
-          signtool sign `
+          & $signtool sign `
             /f codesign.pfx `
             /p "$env:SIGNING_CERT_PASSWORD" `
             /fd sha256 `
@@ -199,7 +225,7 @@ jobs:
   release:
     needs: [build-linux, build-windows-sign]
     name: Create Release Draft
-    runs-on: ubuntu-latest
+  runs-on: [self-hosted, linux]
     steps:
       - name: Download Linux artifacts
         uses: actions/download-artifact@v4
