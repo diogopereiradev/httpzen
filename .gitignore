@@ -59,7 +59,7 @@ Gopkg.lock
 # Go cache files
 *.cache
 
-# Security: never commit signing materials
+# Security
 *.pfx
 *.p12
 *.pem
