@@ -1,4 +1,4 @@
-.PHONY: build test lint clean
+.PHONY: build build-linux-only build-windows-only test lint clean
 .ONESHELL:
 
 VERSION := $(shell grep "\[VERSION\]" -A 1 METADATA | awk 'NR==2')
@@ -11,6 +11,8 @@ INTERNAL_DIRS := $(shell find ./internal -mindepth 1 -maxdepth 1 -type d -not -n
 
 # Public targets
 build: clean lint .change-package-json-version .build .build-linux .build-windows .build-debian .build-rpm .build-flatpak
+build-linux-only: clean lint .change-package-json-version .build .build-linux .build-debian .build-rpm .build-flatpak
+build-windows-only: clean lint .change-package-json-version .build .build-windows
 
 test:
 	@echo "\033[33m[Make]\033[0m \033[32mRunning tests...\033[0m"

@@ -28,11 +28,14 @@
     "title": "Quick start",
     "subtitle": "Download a package for your distro or the standalone binary.",
     "open-releases": "Download",
+    "open": "Access repository",
     "after-download": "After download:",
     "binary": { "title": "Binary", "desc": "Standalone executable for any Linux distro." },
     "deb": { "title": "Debian/Ubuntu (.deb)", "desc": "Install with apt on Debian-based distros." },
     "rpm": { "title": "Fedora/RHEL (.rpm)", "desc": "Install with dnf/yum on RPM-based distros." },
-    "flatpak": { "title": "Flatpak", "desc": "Install via Flatpak package." }
+    "flatpak": { "title": "Flatpak", "desc": "Install via Flatpak package." },
+    "windows": { "title": "Windows", "desc": "Standalone executable for Windows." },
+    "source": { "title": "Source", "desc": "Build from source. Read the README for more information." }
   },
   "docs": {
     "title": "Documentation",

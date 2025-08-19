@@ -47,6 +47,27 @@
             :code-to-copy="'flatpak install ./httpzen.flatpak'"
             :alt="true"
           />
+          <HomeInstallCard
+            :icon="'mdi:windows'"
+            :title="$t('install.windows.title')"
+            :desc="$t('install.windows.desc')"
+            link="https://github.com/diogopereiradev/httpzen/releases/latest/download/httpzen.exe"
+            :link-label="$t('install.open-releases')"
+            :hint="$t('install.after-download')"
+            :code="'.\\httpzen.exe'"
+            :code-to-copy="'.\\httpzen.exe'"
+          />
+          <HomeInstallCard
+            :icon="'mdi:windows'"
+            :title="$t('install.source.title')"
+            :desc="$t('install.source.desc')"
+            link="https://github.com/diogopereiradev/httpzen"
+            :link-label="$t('install.open')"
+            :hint="$t('install.after-download')"
+            :code="'git clone https://github.com/diogopereiradev/httpzen'"
+            :code-to-copy="'git clone https://github.com/diogopereiradev/httpzen'"
+            :alt="true"
+          />
         </div>
       </div>
     </div>

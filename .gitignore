@@ -58,3 +58,10 @@ Gopkg.lock
 
 # Go cache files
 *.cache
+
+# Security
+*.pfx
+*.p12
+*.pem
+*.key
+cert.pfx
