@@ -42,7 +42,7 @@
       <p class="description">{{ $t('description') }}</p>
       <div class="actions">
         <div class="example-command">
-          <Icon name="octicon:command-palette-16" size="20" />
+          <Icon class="command-icon" name="octicon:command-palette-16" size="20" />
           <span>httpzen GET https://google.com</span>
           <button class="copy-btn" :disabled="state.copied" @click="copyToClipboard('httpzen GET https://google.com')">
             <Icon v-if="!state.copied" name="mdi:content-copy" size="20" />
@@ -67,6 +67,7 @@
     min-height: 600px;
     z-index: 1;
     overflow: hidden;
+
     .navbar {
       width: 100%;
       height: 80px;
@@ -108,6 +109,9 @@
           &:hover {
             color: $primary;
             background: rgba($primary, .08);
+          }
+          @media screen and (max-width: 700px) {
+            display: none;
           }
         }
         .theme-toggle {
@@ -181,6 +185,9 @@
       gap: 1.25rem;
       z-index: 2;
       margin: auto 0;
+      @media screen and (max-width: 700px) {
+        padding: 0 1rem;
+      }
       .version-tag {
         display: flex;
         align-items: center;
@@ -214,6 +221,10 @@
         margin-top: 1rem;
         font-size: 2.5rem;
         color: $on-primary;
+        text-align: center;
+        @media screen and (max-width: 700px) {
+          font-size: 1.5rem;
+        }
       }
       .description {
         max-width: 700px;
@@ -227,6 +238,9 @@
         flex-direction: row-reverse;
         align-items: center;
         gap: 1rem;
+        @media screen and (max-width: 700px) {
+          flex-direction: column;
+        }
         .example-command {
           display: flex;
           align-items: center;
@@ -237,6 +251,14 @@
           color: $on-surface;
           border-radius: $rounded;
           box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          @media screen and (max-width: 700px) {
+            span {
+              font-size: .725rem !important;
+            }
+            .command-icon {
+              display: none;
+            }
+          }
           span {
             font-size: .875rem;
             color: rgba($on-surface, .8);
