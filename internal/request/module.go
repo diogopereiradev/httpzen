@@ -1,6 +1,7 @@
 package request_module
 
 import (
+	"crypto/tls"
 	"net/http"
 	"os"
 	"time"
@@ -19,6 +20,7 @@ type RequestOptions struct {
 	Body        []http_utility.HttpContentData `json:"body"`
 	Url         string                         `json:"url"`
 	Method      string                         `json:"method"`
+	Insecure    bool                           `json:"insecure"`
 }
 
 var Exit = os.Exit
@@ -62,7 +64,9 @@ func runRequest(options RequestOptions) RequestResponse {
 	}
 
 	client := restyNew()
+
 	client.SetTimeout(options.Timeout)
+	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: options.Insecure})
 
 	req := client.R()
 	headers := make(map[string]string)

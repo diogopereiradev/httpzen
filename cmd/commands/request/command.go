@@ -67,11 +67,13 @@ func Init(rootCmd *cobra.Command) {
 			return
 		}
 
+		insecure, _ := cmd.Flags().GetBool("insecure")
 		requestOptions := request_module.RequestOptions{
-			Url:     url,
-			Headers: parseHeaders(flags.Headers),
-			Method:  method,
-			Timeout: 30 * time.Second,
+			Url:      url,
+			Headers:  parseHeaders(flags.Headers),
+			Method:   method,
+			Timeout:  30 * time.Second,
+			Insecure: insecure,
 		}
 
 		var body []http_utility.HttpContentData
@@ -86,4 +88,5 @@ func Init(rootCmd *cobra.Command) {
 
 	rootCmd.Flags().BoolP("body", "b", false, "Include body in the request (default: false)")
 	rootCmd.Flags().StringSliceP("header", "H", []string{}, "Add a header to the request (can be used multiple times)")
+	rootCmd.Flags().BoolP("insecure", "k", false, "Allow insecure SSL certificates (Self-Signed)")
 }

@@ -15,11 +15,13 @@ import (
 var CategorizedFlags = map[string][]string{
 	"Main parameters": {"help"},
 	"Data":            {"header", "body"},
+	"Security":        {"insecure"},
 }
 
 var CategorizedFlagsOrder = []string{
 	"Main parameters",
 	"Data",
+	"Security",
 }
 
 func padRight(str string, length int) string {
@@ -86,7 +88,7 @@ func renderFlags(cmd *cobra.Command, maxFlagNameLen int) string {
 	})
 
 	if len(uncategorized) > 0 {
-		b.WriteString("Available parameters\n\n")
+		b.WriteString("\nAvailable parameters\n\n")
 		for _, flagName := range uncategorized {
 			flag := cmd.Flags().Lookup(flagName)
 
