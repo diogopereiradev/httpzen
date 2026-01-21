@@ -130,4 +130,4 @@ Contributions are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) fo
 <br />
 
 ## License
-HTTPZen is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+HttpZen is licensed under the MIT License. See [LICENSE](LICENSE) for details.
