@@ -1,6 +1,7 @@
 package request_command
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"strings"
@@ -38,7 +39,40 @@ func parseHeaders(headers []string) http.Header {
 }
 
 func isUrl(s string) bool {
+	if len(s) > 1 && s[0] == ':' && s[1] >= '0' && s[1] <= '9' {
+		return true
+	}
 	return strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://")
+}
+
+func parseInlineBody(args []string) []http_utility.HttpContentData {
+	pairs := map[string]string{}
+	for _, arg := range args {
+		parts := strings.SplitN(arg, "=", 2)
+		if len(parts) == 2 {
+			key := parts[0]
+			value := parts[1]
+			// Remove surrounding quotes if present
+			value = strings.Trim(value, "\"")
+			pairs[key] = value
+		}
+	}
+
+	if len(pairs) == 0 {
+		return nil
+	}
+
+	jsonBytes, err := json.Marshal(pairs)
+	if err != nil {
+		return nil
+	}
+
+	return []http_utility.HttpContentData{
+		{
+			ContentType: "application/json",
+			Value:       string(jsonBytes),
+		},
+	}
 }
 
 func Init(rootCmd *cobra.Command) {
@@ -49,10 +83,12 @@ func Init(rootCmd *cobra.Command) {
 		}
 
 		var method, url string
+		var remainingArgs []string
 
 		if isUrl(args[0]) {
 			method = "GET"
 			url = args[0]
+			remainingArgs = args[1:]
 		} else {
 			if len(args) < 2 {
 				cmd.Help()
@@ -67,6 +103,7 @@ func Init(rootCmd *cobra.Command) {
 				Exit(1)
 			}
 			url = args[1]
+			remainingArgs = args[2:]
 		}
 
 		parsedUrl := http_utility.ParseUrl(url)
@@ -84,7 +121,12 @@ func Init(rootCmd *cobra.Command) {
 			Body:    cmd.Flag("body").Value.String() == "true",
 		}
 
-		if flags.Body && (method == "GET" || method == "HEAD") {
+		// Parse inline body from remaining args (key=value pairs)
+		inlineBody := parseInlineBody(remainingArgs)
+		hasInlineBody := len(inlineBody) > 0
+
+		if (flags.Body || hasInlineBody) &&
+			(method == "GET" || method == "HEAD") {
 			logger_module.Error(
 				"Body cannot be included in GET or HEAD requests.",
 				70,
@@ -103,7 +145,9 @@ func Init(rootCmd *cobra.Command) {
 		}
 
 		var body []http_utility.HttpContentData
-		if flags.Body {
+		if hasInlineBody {
+			body = inlineBody
+		} else if flags.Body {
 			BodyMenuNewFunc(&requestOptions, &body)
 		}
 		requestOptions.Body = body
