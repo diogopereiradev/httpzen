@@ -11,10 +11,9 @@ INTERNAL_DIRS := $(shell find ./internal -mindepth 1 -maxdepth 1 -type d -not -n
 
 # Public targets
 build: clean lint .change-package-json-version .build .build-linux .build-windows .build-macos .build-debian .build-rpm .build-flatpak
-build-linux-only: clean lint .change-package-json-version .build .build-linux .build-debian .build-rpm .build-flatpak
-build-windows-only: clean lint .change-package-json-version .build .build-windows
-build-macos-only: clean lint .change-package-json-version .build .build-macos
-build-binaries: clean lint .change-package-json-version .build .build-linux .build-windows .build-macos
+build-linux-only: lint .change-package-json-version .build .build-linux .build-debian .build-rpm .build-flatpak
+build-windows-only: lint .change-package-json-version .build .build-windows
+build-macos-only: lint .change-package-json-version .build .build-macos
 
 test:
 	@echo "\033[33m[Make]\033[0m \033[32mRunning tests...\033[0m"
