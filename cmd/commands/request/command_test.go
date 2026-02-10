@@ -60,6 +60,7 @@ func Test_Init(t *testing.T) {
 		calledBodyMenu    bool
 		calledRunRequest  bool
 		calledRequestMenu bool
+		capturedOpts      request_module.RequestOptions
 	)
 
 	oldExit := Exit
@@ -75,6 +76,7 @@ func Test_Init(t *testing.T) {
 	oldRunRequest := RunRequestFunc
 	RunRequestFunc = func(opts request_module.RequestOptions) request_module.RequestResponse {
 		calledRunRequest = true
+		capturedOpts = opts
 		return request_module.RequestResponse{}
 	}
 	defer func() { RunRequestFunc = oldRunRequest }()
@@ -89,6 +91,22 @@ func Test_Init(t *testing.T) {
 		cmd := &cobra.Command{Use: "test"}
 		Init(cmd)
 		cmd.SetArgs([]string{})
+
+		var helpCalled bool
+		cmd.SetHelpFunc(func(*cobra.Command, []string) {
+			helpCalled = true
+		})
+
+		cmd.Execute()
+		if !helpCalled {
+			t.Error("expected help to be called")
+		}
+	})
+
+	t.Run("calls help if only method is provided", func(t *testing.T) {
+		cmd := &cobra.Command{Use: "test"}
+		Init(cmd)
+		cmd.SetArgs([]string{"GET"})
 
 		var helpCalled bool
 		cmd.SetHelpFunc(func(*cobra.Command, []string) {
@@ -141,6 +159,27 @@ func Test_Init(t *testing.T) {
 		cmd.Execute()
 	})
 
+	t.Run("body not allowed returns early when Exit is no-op", func(t *testing.T) {
+		var exitCode int
+		oldExitLocal := Exit
+		Exit = func(code int) { exitCode = code }
+		defer func() { Exit = oldExitLocal }()
+
+		calledRunRequest = false
+		calledRequestMenu = false
+		cmd := &cobra.Command{Use: "test"}
+		Init(cmd)
+		cmd.SetArgs([]string{"GET", "http://test", "foo=bar"})
+		cmd.Execute()
+
+		if exitCode != 1 {
+			t.Errorf("expected exit code 1, got %d", exitCode)
+		}
+		if calledRunRequest || calledRequestMenu {
+			t.Error("expected request to not run when body is not allowed")
+		}
+	})
+
 	t.Run("body not allowed for HEAD", func(t *testing.T) {
 		cmd := &cobra.Command{Use: "test"}
 		Init(cmd)
@@ -168,6 +207,45 @@ func Test_Init(t *testing.T) {
 		if !calledBodyMenu || !calledRunRequest || !calledRequestMenu {
 			t.Error("expected all functions to be called")
 		}
+	})
+
+	t.Run("valid request with inline body (does not open body menu)", func(t *testing.T) {
+		calledBodyMenu = false
+		calledRunRequest = false
+		calledRequestMenu = false
+		capturedOpts = request_module.RequestOptions{}
+
+		cmd := &cobra.Command{Use: "test"}
+		Init(cmd)
+
+		cmd.SetArgs([]string{"POST", "http://test", "foo=\"bar\""})
+		cmd.Flags().Set("insecure", "true")
+		cmd.Execute()
+
+		if calledBodyMenu {
+			t.Error("expected body menu not to be called when inline body is provided")
+		}
+		if !calledRunRequest || !calledRequestMenu {
+			t.Error("expected RunRequestFunc and RequestMenuNewFunc to be called")
+		}
+		if len(capturedOpts.Body) == 0 {
+			t.Error("expected inline body to be set in request options")
+		}
+		if !capturedOpts.Insecure {
+			t.Error("expected insecure flag to be propagated")
+		}
+	})
+
+	t.Run("inline body not allowed for GET", func(t *testing.T) {
+		cmd := &cobra.Command{Use: "test"}
+		Init(cmd)
+		cmd.SetArgs([]string{"GET", "http://test", "foo=bar"})
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("expected exit to be called")
+			}
+		}()
+		cmd.Execute()
 	})
 
 	t.Run("valid request without body", func(t *testing.T) {
@@ -212,6 +290,23 @@ func Test_Init(t *testing.T) {
 			t.Error(
 				"expected RunRequestFunc and RequestMenuNewFunc to be called",
 			)
+		}
+	})
+
+	t.Run("GET request with shorthand port URL only (no method)", func(t *testing.T) {
+		calledRunRequest = false
+		calledRequestMenu = false
+		capturedOpts = request_module.RequestOptions{}
+
+		cmd := &cobra.Command{Use: "test"}
+		Init(cmd)
+		cmd.SetArgs([]string{":8080/api"})
+		cmd.Execute()
+		if !calledRunRequest || !calledRequestMenu {
+			t.Error("expected RunRequestFunc and RequestMenuNewFunc to be called")
+		}
+		if capturedOpts.Url != "http://localhost:8080/api" {
+			t.Errorf("expected url to be expanded, got %q", capturedOpts.Url)
 		}
 	})
 }

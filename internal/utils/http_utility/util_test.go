@@ -169,6 +169,25 @@ func TestParseUrl(t *testing.T) {
 	if ParseUrl("ftp://foo") != "" {
 		t.Errorf("expected empty for invalid url")
 	}
+
+	if ParseUrl(":8080/api") != "http://localhost:8080/api" {
+		t.Errorf("expected shorthand port to be expanded")
+	}
+}
+
+func TestCheckIsUrl(t *testing.T) {
+	if !CheckIsUrl("http://foo") {
+		t.Errorf("expected http url to be detected")
+	}
+	if !CheckIsUrl("https://foo") {
+		t.Errorf("expected https url to be detected")
+	}
+	if !CheckIsUrl(":8080/api") {
+		t.Errorf("expected shorthand port url to be detected")
+	}
+	if CheckIsUrl("not-a-url") {
+		t.Errorf("expected non-url to be false")
+	}
 }
 
 func TestParseExecutionTimeInMilliseconds(t *testing.T) {
@@ -186,6 +205,10 @@ func TestDetectContentType(t *testing.T) {
 		t.Errorf("expected json")
 	}
 
+	if DetectContentType("{invalid json") != "text" {
+		t.Errorf("expected invalid json to fall back to text")
+	}
+
 	if DetectContentType("<html>") != "html" {
 		t.Errorf("expected html")
 	}
@@ -196,6 +219,29 @@ func TestDetectContentType(t *testing.T) {
 
 	if DetectContentType("plain text") != "text" {
 		t.Errorf("expected text")
+	}
+}
+
+func TestParseInlineBody(t *testing.T) {
+	if ParseInlineBody(nil) != nil {
+		t.Errorf("expected nil for empty args")
+	}
+	if ParseInlineBody([]string{"noequal"}) != nil {
+		t.Errorf("expected nil for args without key=value")
+	}
+
+	res := ParseInlineBody([]string{"foo=\"bar\"", "a=b"})
+	if len(res) != 1 {
+		t.Fatalf("expected 1 content item")
+	}
+	if res[0].ContentType != "application/json" {
+		t.Fatalf("expected application/json")
+	}
+	if !strings.Contains(res[0].Value, "\"foo\":\"bar\"") {
+		t.Errorf("expected quotes to be trimmed")
+	}
+	if !strings.Contains(res[0].Value, "\"a\":\"b\"") {
+		t.Errorf("expected second pair to be present")
 	}
 }
 
@@ -235,5 +281,50 @@ func TestGetFileByPath(t *testing.T) {
 
 	if !info.PathIsValid {
 		t.Errorf("expected valid path")
+	}
+
+	dir, err := os.MkdirTemp("", "test.dir*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
+	dirInfo, err := GetFileByPath(dir)
+	if err == nil {
+		t.Errorf("expected error for directory path")
+	}
+	if dirInfo == nil || !dirInfo.PathIsValid {
+		t.Errorf("expected PathIsValid=true for directory path")
+	}
+}
+
+func TestParseMultipartFormData_FilePermissionDeniedFallsBackToField(t *testing.T) {
+	file, err := os.CreateTemp("", "permtest*.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	name := file.Name()
+	_, _ = file.WriteString("SHOULD_NOT_BE_INCLUDED")
+	file.Close()
+	defer os.Remove(name)
+
+	if err := os.Chmod(name, 0); err != nil {
+		t.Skipf("chmod not supported: %v", err)
+	}
+	defer os.Chmod(name, 0600)
+
+	data := []HttpContentData{{Key: "file1", Value: name}}
+	res := ParseMultipartFormData(data)
+	buf, ok := res.Result.(*bytes.Buffer)
+	if !ok {
+		t.Fatalf("expected buffer result")
+	}
+
+	body := buf.String()
+	if !strings.Contains(body, name) {
+		t.Errorf("expected multipart body to contain the file path value")
+	}
+	if strings.Contains(body, "SHOULD_NOT_BE_INCLUDED") {
+		t.Errorf("expected multipart body to not include file contents when open fails")
 	}
 }

@@ -107,6 +107,32 @@ func ParseUrlEncodedForm(data []HttpContentData) HandleParseResult {
 	}
 }
 
+func ParseInlineBody(args []string) []HttpContentData {
+	pairs := map[string]string{}
+	for _, arg := range args {
+		parts := strings.SplitN(arg, "=", 2)
+		if len(parts) == 2 {
+			key := parts[0]
+			value := parts[1]
+			value = strings.Trim(value, "\"")
+			pairs[key] = value
+		}
+	}
+
+	if len(pairs) == 0 {
+		return nil
+	}
+
+	jsonBytes, _ := json.Marshal(pairs)
+
+	return []HttpContentData{
+		{
+			ContentType: "application/json",
+			Value:       string(jsonBytes),
+		},
+	}
+}
+
 func ParseHttpMethod(method string) string {
 	switch strings.ToLower(method) {
 	case "get":
@@ -127,14 +153,24 @@ func ParseHttpMethod(method string) string {
 }
 
 func ParseUrl(url string) string {
-	// Localhost shorthand: :8080/path → http://localhost:8080/path
-	if len(url) > 1 && url[0] == ':' && url[1] >= '0' && url[1] <= '9' {
-		url = "http://localhost" + url
-	}
+	url = ParsePortShorthand(url)
 
 	if !strings.HasPrefix(url, "http://") &&
 		!strings.HasPrefix(url, "https://") {
 		return ""
+	}
+	return url
+}
+
+func CheckIsUrl(text string) bool {
+	text = ParsePortShorthand(text)
+	return strings.HasPrefix(text, "http://") || strings.HasPrefix(text, "https://")
+}
+
+func ParsePortShorthand(url string) string {
+	// :8080/api/auth -> http://localhost:8080/api/auth
+	if len(url) > 1 && url[0] == ':' && url[1] >= '0' && url[1] <= '9' {
+		url = "http://localhost" + url
 	}
 	return url
 }
