@@ -1,4 +1,4 @@
-.PHONY: build build-linux-only build-windows-only test lint clean
+.PHONY: build build-linux-only build-windows-only build-macos-only test lint clean
 .ONESHELL:
 
 VERSION := $(shell grep "\[VERSION\]" -A 1 METADATA | awk 'NR==2')
@@ -10,11 +10,11 @@ LICENSE := $(shell head -n 1 LICENSE)
 INTERNAL_DIRS := $(shell find ./internal -mindepth 1 -maxdepth 1 -type d -not -name components -not -name menus | xargs -I{} basename {} | awk '{printf "./internal/%s/... ", $$1}')
 
 # Public targets
-build: clean lint .change-package-json-version .build .build-linux .build-windows .build-debian .build-rpm .build-flatpak
+build: clean lint .change-package-json-version .build .build-linux .build-windows .build-macos .build-debian .build-rpm .build-flatpak
 build-linux-only: clean lint .change-package-json-version .build .build-linux .build-debian .build-rpm .build-flatpak
 build-windows-only: clean lint .change-package-json-version .build .build-windows
-build-binaries: clean lint .change-package-json-version .build .build-linux .build-windows
-build-macos: clean lint .change-package-json-version .build .build-macos-binary
+build-macos-only: clean lint .change-package-json-version .build .build-macos
+build-binaries: clean lint .change-package-json-version .build .build-linux .build-windows .build-macos
 
 test:
 	@echo "\033[33m[Make]\033[0m \033[32mRunning tests...\033[0m"
@@ -62,7 +62,7 @@ clean: .debian-clean
 	@echo "\033[33m[Make]\033[0m \033[32mBuilding...\033[0m"
 	@mkdir -p ./build
 
-.build-macos-binary:
+.build-macos:
 	@echo "\033[33m[Make]\033[0m \033[32mBuilding macOS binary...\033[0m"
 	@GOOS=darwin GOARCH=arm64 go build \
 		-ldflags="-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Version=$(VERSION)' \
@@ -70,7 +70,7 @@ clean: .debian-clean
 		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Website=$(WEBSITE)' \
 		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Repository=$(REPOSITORY)' \
 		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.License=$(LICENSE)'" \
-		-o ./build/httpzen-macos main.go
+		-o ./build/httpzen-arm64 main.go
 	@echo "\033[33m[Make]\033[0m \033[32mmacOS binary build finished.\033[0m"
 
 .build-linux:
