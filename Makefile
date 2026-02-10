@@ -7,12 +7,14 @@ REPOSITORY := $(shell grep "\[REPOSITORY\]" -A 1 METADATA | awk 'NR==2')
 CURRENT_DATETIME := $(shell date +%Y-%m-%d\ %H:%M:%S)
 LICENSE := $(shell head -n 1 LICENSE)
 
-INTERNAL_DIRS := $(shell find ./internal -mindepth 1 -maxdepth 1 -type d -not -name components -not -name menus -printf './internal/%f/... ')
+INTERNAL_DIRS := $(shell find ./internal -mindepth 1 -maxdepth 1 -type d -not -name components -not -name menus | xargs -I{} basename {} | awk '{printf "./internal/%s/... ", $$1}')
 
 # Public targets
 build: clean lint .change-package-json-version .build .build-linux .build-windows .build-debian .build-rpm .build-flatpak
 build-linux-only: clean lint .change-package-json-version .build .build-linux .build-debian .build-rpm .build-flatpak
 build-windows-only: clean lint .change-package-json-version .build .build-windows
+build-binaries: clean lint .change-package-json-version .build .build-linux .build-windows
+build-macos: clean lint .change-package-json-version .build .build-macos-binary
 
 test:
 	@echo "\033[33m[Make]\033[0m \033[32mRunning tests...\033[0m"
@@ -41,7 +43,7 @@ clean: .debian-clean
 	@echo "\033[33m[Make]\033[0m \033[32mCleaning up vendor folder...\033[0m"
 	@rm -rf ./vendor
 	@echo "\033[33m[Make]\033[0m \033[32mCleaning up build folder...\033[0m"
-	@rm -rf ./build	
+	@rm -rf ./build
 	@rm -rf ./.flatpak-builder
 	@rm -f ./rsrc_windows_*.syso
 	@echo "\033[33m[Make]\033[0m \033[32mCleaned.\033[0m"
@@ -50,7 +52,7 @@ clean: .debian-clean
 .change-package-json-version:
 	@echo "\033[33m[Make]\033[0m \033[32mUpdating version of package.json...\033[0m"
 	@if [ -f ./docs/package.json ]; then \
-	sed -i 's/\("version" *: *\)"[^"]*"/\1"$(VERSION)"/' ./docs/package.json; \
+	sed 's/\("version" *: *\)"[^"]*"/\1"$(VERSION)"/' ./docs/package.json > ./docs/package.json.tmp && mv ./docs/package.json.tmp ./docs/package.json; \
 	echo "\033[33m[Make]\033[0m \033[32mpackage.json version updated to $(VERSION).\033[0m"; \
 	else \
 	echo "\033[33m[Make]\033[0m \033[31mpackage.json not found in ./docs.\033[0m"; \
@@ -59,6 +61,17 @@ clean: .debian-clean
 .build:
 	@echo "\033[33m[Make]\033[0m \033[32mBuilding...\033[0m"
 	@mkdir -p ./build
+
+.build-macos-binary:
+	@echo "\033[33m[Make]\033[0m \033[32mBuilding macOS binary...\033[0m"
+	@GOOS=darwin GOARCH=arm64 go build \
+		-ldflags="-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Version=$(VERSION)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.BuildDate=$(CURRENT_DATETIME)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Website=$(WEBSITE)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.Repository=$(REPOSITORY)' \
+		-X 'github.com/diogopereiradev/httpzen/cmd/commands/version.License=$(LICENSE)'" \
+		-o ./build/httpzen-macos main.go
+	@echo "\033[33m[Make]\033[0m \033[32mmacOS binary build finished.\033[0m"
 
 .build-linux:
 	@echo "\033[33m[Make]\033[0m \033[32mBuilding Linux binary...\033[0m"
@@ -88,47 +101,46 @@ clean: .debian-clean
 	@go install github.com/tc-hib/go-winres@v0.3.3 || go install github.com/tc-hib/go-winres@latest
 	@mkdir -p ./winres
 	@echo "\033[33m[Make]\033[0m \033[32mGenerating winres.json...\033[0m"
-	@cat > ./winres/winres.json <<-'EOF'
-	{
-		"RT_VERSION": {
-			"#1": {
-				"0000": {
-					"fixed": {
-						"file_version": "$(VERSION).0",
-						"product_version": "$(VERSION).0"
-					},
-					"info": {
-						"0409": {
-							"CompanyName": "diogopereiradev",
-							"FileDescription": "httpzen - HTTP client TUI/CLI",
-							"FileVersion": "$(VERSION).0",
-							"OriginalFilename": "httpzen.exe",
-							"ProductName": "httpzen",
-							"ProductVersion": "$(VERSION)",
-							"Comments": "$(WEBSITE)",
-							"LegalCopyright": "$(LICENSE)"
-						}
-					}
-				}
-			}
-		},
-		"RT_MANIFEST": {
-			"#1": {
-				"0409": {
-					"execution-level": "as invoker",
-					"dpi-awareness": "per monitor v2",
-					"minimum-os": "win7",
-					"use-common-controls-v6": true
-				}
-			}
-		},
-		"RT_GROUP_ICON": {
-			"APP": {
-				"0000": "../docs/public/favicons/favicon-96x96.png"
-			}
-		}
-	}
-	EOF
+	@printf '%s\n' \
+		'{' \
+		'  "RT_VERSION": {' \
+		'    "#1": {' \
+		'      "0000": {' \
+		'        "fixed": {' \
+		'          "file_version": "$(VERSION).0",' \
+		'          "product_version": "$(VERSION).0"' \
+		'        },' \
+		'        "info": {' \
+		'          "0409": {' \
+		'            "CompanyName": "diogopereiradev",' \
+		'            "FileDescription": "httpzen - HTTP client TUI/CLI",' \
+		'            "FileVersion": "$(VERSION).0",' \
+		'            "OriginalFilename": "httpzen.exe",' \
+		'            "ProductName": "httpzen",' \
+		'            "ProductVersion": "$(VERSION)",' \
+		'            "Comments": "$(WEBSITE)",' \
+		'            "LegalCopyright": "$(LICENSE)"' \
+		'          }' \
+		'        }' \
+		'      }' \
+		'    }' \
+		'  },' \
+		'  "RT_MANIFEST": {' \
+		'    "#1": {' \
+		'      "0409": {' \
+		'        "execution-level": "as invoker",' \
+		'        "dpi-awareness": "per monitor v2",' \
+		'        "minimum-os": "win7",' \
+		'        "use-common-controls-v6": true' \
+		'      }' \
+		'    }' \
+		'  },' \
+		'  "RT_GROUP_ICON": {' \
+		'    "APP": {' \
+		'      "0000": "../docs/public/favicons/favicon-96x96.png"' \
+		'    }' \
+		'  }' \
+		'}' > ./winres/winres.json
 	@echo "\033[33m[Make]\033[0m \033[32mEmbedding Windows resources with go-winres...\033[0m"
 	@go-winres make
 	@echo "\033[33m[Make]\033[0m \033[32mWindows resources ready.\033[0m"
@@ -143,7 +155,7 @@ clean: .debian-clean
 	@rm -rf ./build/debian
 	@mkdir -p ./build/debian/.cache/usr/bin
 	@echo "\033[33m[Make]\033[0m \033[32mUpdating Debian control file version to $(VERSION)...\033[0m"
-	@sed -i "s/^Version: .*/Version: $(VERSION)/" ./pkgroot/DEBIAN/control
+	@sed "s/^Version: .*/Version: $(VERSION)/" ./pkgroot/DEBIAN/control > ./pkgroot/DEBIAN/control.tmp && mv ./pkgroot/DEBIAN/control.tmp ./pkgroot/DEBIAN/control
 	@cp ./build/httpzen ./build/debian/.cache/usr/bin/httpzen
 	@cp -r ./pkgroot/DEBIAN ./build/debian/.cache/DEBIAN
 	@dpkg-deb --build ./build/debian/.cache ./build/debian/httpzen.deb

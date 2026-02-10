@@ -37,21 +37,44 @@ func parseHeaders(headers []string) http.Header {
 	return result
 }
 
+func isUrl(s string) bool {
+	return strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://")
+}
+
 func Init(rootCmd *cobra.Command) {
 	rootCmd.Run = func(cmd *cobra.Command, args []string) {
-		if len(args) < 2 {
+		if len(args) < 1 {
 			cmd.Help()
 			return
 		}
-		method := http_utility.ParseHttpMethod(args[0])
-		if method == "" {
-			logger_module.Error("Invalid HTTP method. Please provide a valid HTTP method (GET, POST, PATCH, PUT, DELETE, HEAD).", 70)
-			Exit(1)
+
+		var method, url string
+
+		if isUrl(args[0]) {
+			method = "GET"
+			url = args[0]
+		} else {
+			if len(args) < 2 {
+				cmd.Help()
+				return
+			}
+			method = http_utility.ParseHttpMethod(args[0])
+			if method == "" {
+				logger_module.Error(
+					"Invalid HTTP method. Please provide a valid HTTP method (GET, POST, PATCH, PUT, DELETE, HEAD).",
+					70,
+				)
+				Exit(1)
+			}
+			url = args[1]
 		}
 
-		url := http_utility.ParseUrl(args[1])
-		if url == "" {
-			logger_module.Error("Invalid URL. Please provide a valid URL (http:// or https://).", 70)
+		parsedUrl := http_utility.ParseUrl(url)
+		if parsedUrl == "" {
+			logger_module.Error(
+				"Invalid URL. Please provide a valid URL (http:// or https://).",
+				70,
+			)
 			Exit(1)
 		}
 
@@ -62,14 +85,17 @@ func Init(rootCmd *cobra.Command) {
 		}
 
 		if flags.Body && (method == "GET" || method == "HEAD") {
-			logger_module.Error("Body cannot be included in GET or HEAD requests.", 70)
+			logger_module.Error(
+				"Body cannot be included in GET or HEAD requests.",
+				70,
+			)
 			Exit(1)
 			return
 		}
 
 		insecure, _ := cmd.Flags().GetBool("insecure")
 		requestOptions := request_module.RequestOptions{
-			Url:      url,
+			Url:      parsedUrl,
 			Headers:  parseHeaders(flags.Headers),
 			Method:   method,
 			Timeout:  30 * time.Second,
@@ -86,7 +112,10 @@ func Init(rootCmd *cobra.Command) {
 		RequestMenuNewFunc(&res)
 	}
 
-	rootCmd.Flags().BoolP("body", "b", false, "Include body in the request (default: false)")
-	rootCmd.Flags().StringSliceP("header", "H", []string{}, "Add a header to the request (can be used multiple times)")
-	rootCmd.Flags().BoolP("insecure", "k", false, "Allow insecure SSL certificates (Self-Signed)")
+	rootCmd.Flags().
+		BoolP("body", "b", false, "Include body in the request (default: false)")
+	rootCmd.Flags().
+		StringSliceP("header", "H", []string{}, "Add a header to the request (can be used multiple times)")
+	rootCmd.Flags().
+		BoolP("insecure", "k", false, "Allow insecure SSL certificates (Self-Signed)")
 }
