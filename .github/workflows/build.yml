@@ -23,9 +23,9 @@ jobs:
       - name: Run tests
         run: make test
 
-  build-linux:
+  build-binaries:
     needs: tests
-    name: Build Linux Artifacts
+    name: Build Binaries Artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -52,6 +52,9 @@ jobs:
 
       - name: Build using Makefile (Linux only)
         run: make build-linux-only
+        
+      - name: Build using Makefile (Arm64 only)
+        run: make build-macos-only
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
