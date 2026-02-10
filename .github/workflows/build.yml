@@ -56,10 +56,10 @@ jobs:
       - name: Build using Makefile (Arm64 only)
         run: make build-macos-only
 
-      - name: Upload Linux artifacts
+      - name: Upload Binaries artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-artifacts
+          name: binaries-artifacts
           path: |
             build/httpzen*
             build/debian/*.deb
@@ -239,14 +239,14 @@ jobs:
           path: build/httpzen.exe
 
   release:
-    needs: [build-linux, build-windows-sign]
+    needs: [build-binaries, build-windows-sign]
     name: Create Release Draft
     runs-on: ubuntu-latest
     steps:
-      - name: Download Linux artifacts
+      - name: Download Binaries artifacts
         uses: actions/download-artifact@v4
         with:
-          name: linux-artifacts
+          name: binaries-artifacts
           path: build
 
       - name: Download Windows artifact
