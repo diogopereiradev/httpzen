@@ -259,6 +259,7 @@ jobs:
           files: |
             build/httpzen
             build/httpzen.exe
+            build/httpzen-arm64
             build/debian/httpzen.deb
             build/flatpak/httpzen.flatpak
             build/httpzen.rpm

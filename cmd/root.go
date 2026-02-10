@@ -13,7 +13,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "httpzen [METHOD] [URL] [PARAMETERS...]",
+	Use:   "httpzen [METHOD?] [URL] [PARAMETERS...]",
 	Short: "Httpzen CLI Tool for API Management and Development",
 	Args:  cobra.ArbitraryArgs,
 }

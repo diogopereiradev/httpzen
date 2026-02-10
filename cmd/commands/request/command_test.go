@@ -179,7 +179,39 @@ func Test_Init(t *testing.T) {
 		cmd.SetArgs([]string{"GET", "http://test"})
 		cmd.Execute()
 		if !calledRunRequest || !calledRequestMenu {
-			t.Error("expected RunRequestFunc and RequestMenuNewFunc to be called")
+			t.Error(
+				"expected RunRequestFunc and RequestMenuNewFunc to be called",
+			)
+		}
+	})
+
+	t.Run("GET request with URL only (no method)", func(t *testing.T) {
+		calledRunRequest = false
+		calledRequestMenu = false
+		cmd := &cobra.Command{Use: "test"}
+		Init(cmd)
+
+		cmd.SetArgs([]string{"http://test"})
+		cmd.Execute()
+		if !calledRunRequest || !calledRequestMenu {
+			t.Error(
+				"expected RunRequestFunc and RequestMenuNewFunc to be called",
+			)
+		}
+	})
+
+	t.Run("GET request with https URL only (no method)", func(t *testing.T) {
+		calledRunRequest = false
+		calledRequestMenu = false
+		cmd := &cobra.Command{Use: "test"}
+		Init(cmd)
+
+		cmd.SetArgs([]string{"https://test"})
+		cmd.Execute()
+		if !calledRunRequest || !calledRequestMenu {
+			t.Error(
+				"expected RunRequestFunc and RequestMenuNewFunc to be called",
+			)
 		}
 	})
 }
