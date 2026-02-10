@@ -35,7 +35,10 @@ func ParseApplicationJson(data HttpContentData) HandleParseResult {
 		logger_module.Error("Failed to parse JSON body: "+err.Error(), 70)
 		return HandleParseResult{}
 	}
-	return HandleParseResult{ContentTypeHeader: data.ContentType, Result: jsonData}
+	return HandleParseResult{
+		ContentTypeHeader: data.ContentType,
+		Result:            jsonData,
+	}
 }
 
 func ParseMultipartFormData(data []HttpContentData) HandleParseResult {
@@ -45,7 +48,10 @@ func ParseMultipartFormData(data []HttpContentData) HandleParseResult {
 	for _, part := range data {
 		var unmarshalResult map[string]string
 		var pair []string
-		if err := json.Unmarshal([]byte(part.Value), &unmarshalResult); err != nil {
+		if err := json.Unmarshal(
+			[]byte(part.Value),
+			&unmarshalResult,
+		); err != nil {
 			pair = []string{part.Key, part.Value}
 		}
 
@@ -54,7 +60,10 @@ func ParseMultipartFormData(data []HttpContentData) HandleParseResult {
 				file, err := os.Open(part.Value)
 				if err == nil {
 					defer file.Close()
-					if fw, err2 := writer.CreateFormFile(part.Key, part.Value); err2 == nil {
+					if fw, err2 := writer.CreateFormFile(
+						part.Key,
+						part.Value,
+					); err2 == nil {
 						_, _ = io.Copy(fw, file)
 					}
 					continue
@@ -77,8 +86,16 @@ func ParseMultipartFormData(data []HttpContentData) HandleParseResult {
 func ParseUrlEncodedForm(data []HttpContentData) HandleParseResult {
 	var formParts []string
 	for _, part := range data {
-		encodedKey := strings.ReplaceAll(strings.ReplaceAll(part.Key, " ", "+"), "=", "%3D")
-		encodedValue := strings.ReplaceAll(strings.ReplaceAll(part.Value, " ", "+"), "=", "%3D")
+		encodedKey := strings.ReplaceAll(
+			strings.ReplaceAll(part.Key, " ", "+"),
+			"=",
+			"%3D",
+		)
+		encodedValue := strings.ReplaceAll(
+			strings.ReplaceAll(part.Value, " ", "+"),
+			"=",
+			"%3D",
+		)
 		formParts = append(formParts, encodedKey+"="+encodedValue)
 	}
 
@@ -87,6 +104,32 @@ func ParseUrlEncodedForm(data []HttpContentData) HandleParseResult {
 	return HandleParseResult{
 		ContentTypeHeader: "application/x-www-form-urlencoded",
 		Result:            encoded,
+	}
+}
+
+func ParseInlineBody(args []string) []HttpContentData {
+	pairs := map[string]string{}
+	for _, arg := range args {
+		parts := strings.SplitN(arg, "=", 2)
+		if len(parts) == 2 {
+			key := parts[0]
+			value := parts[1]
+			value = strings.Trim(value, "\"")
+			pairs[key] = value
+		}
+	}
+
+	if len(pairs) == 0 {
+		return nil
+	}
+
+	jsonBytes, _ := json.Marshal(pairs)
+
+	return []HttpContentData{
+		{
+			ContentType: "application/json",
+			Value:       string(jsonBytes),
+		},
 	}
 }
 
@@ -110,8 +153,24 @@ func ParseHttpMethod(method string) string {
 }
 
 func ParseUrl(url string) string {
-	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+	url = ParsePortShorthand(url)
+
+	if !strings.HasPrefix(url, "http://") &&
+		!strings.HasPrefix(url, "https://") {
 		return ""
+	}
+	return url
+}
+
+func CheckIsUrl(text string) bool {
+	text = ParsePortShorthand(text)
+	return strings.HasPrefix(text, "http://") || strings.HasPrefix(text, "https://")
+}
+
+func ParsePortShorthand(url string) string {
+	// :8080/api/auth -> http://localhost:8080/api/auth
+	if len(url) > 1 && url[0] == ':' && url[1] >= '0' && url[1] <= '9' {
+		url = "http://localhost" + url
 	}
 	return url
 }
@@ -130,10 +189,12 @@ func DetectContentType(result string) string {
 			return "json"
 		}
 	}
-	if strings.HasPrefix(trimmed, "<!DOCTYPE html") || strings.HasPrefix(trimmed, "<html") {
+	if strings.HasPrefix(trimmed, "<!DOCTYPE html") ||
+		strings.HasPrefix(trimmed, "<html") {
 		return "html"
 	}
-	if strings.HasPrefix(trimmed, "<?xml") || (strings.HasPrefix(trimmed, "<") && strings.HasSuffix(trimmed, ">")) {
+	if strings.HasPrefix(trimmed, "<?xml") ||
+		(strings.HasPrefix(trimmed, "<") && strings.HasSuffix(trimmed, ">")) {
 		return "xml"
 	}
 	return "text"
